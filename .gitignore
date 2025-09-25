@@ -1,0 +1,16 @@
+# IntelliJ
+.idea/
+*.iml
+*.iws
+
+# Target
+target/
+build/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
