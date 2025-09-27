@@ -4,9 +4,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
-public class HomeController {
-    @GetMapping("/")
-    public String home() {
-        return "home"; // looks for home.html
+public class PostController {
+    @GetMapping("/posts")
+    public String postsPage() {
+        return "posts"; // Looks for posts.html
     }
 }
