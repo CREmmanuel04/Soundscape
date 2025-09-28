@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Register - Soundscape</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 400px; margin: 50px auto; padding: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; }
+        input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        button { background: #1da1f2; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
+        .error { color: red; margin-top: 10px; }
+        .success { color: green; margin-top: 10px; }
+    </style>
+</head>
+<body>
+<h1>Join Soundscape</h1>
+
+<!-- Error Messages -->
+<div th:if="${param.error != null}" class="error">
+    <span th:if="${param.error[0] == 'empty_fields'}">Please fill in all fields</span>
+    <span th:if="${param.error[0] == 'username_taken'}">Username already taken</span>
+    <span th:if="${param.error[0] == 'email_taken'}">Email already registered</span>
+</div>
+
+<!-- Success Message -->
+<div th:if="${param.registered != null}" class="success">
+    Registration successful! You can now login.
+</div>
+
+<!-- Registration Form -->
+<form action="/register" method="post">
+    <div class="form-group">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+    </div>
+
+    <div class="form-group">
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+    </div>
+
+    <div class="form-group">
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+    </div>
+    <button type="submit">Create Account</button>
+</form>
+
+<p>Already have an account? <a href="/login">Login here</a></p>
+<p><a href="/">Back to Home</a></p>
+</body>
+</html>
