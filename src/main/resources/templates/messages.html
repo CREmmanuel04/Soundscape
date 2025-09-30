@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Messages - Soundscape</title>
+</head>
+<body>
+<h1>Start a Conversation</h1>
+<a href="/">Back to Home</a>
+
+<div style="margin-top: 2rem;">
+    <h2>Users</h2>
+    <div th:if="${users.isEmpty()}">
+        <p>No other users to message.</p>
+    </div>
+    <ul>
+        <li th:each="user : ${users}">
+            <a th:href="@{/messages/{username}(username=${user.username})}" th:text="${user.username}">
+                Username
+            </a>
+        </li>
+    </ul>
+</div>
+</body>
+</html>
