@@ -3,20 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <title>Messages - Soundscape</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        :root {
+            --background-color: #121212;
+            --surface-color: #1E1E1E;
+            --primary-text-color: #FFFFFF;
+            --secondary-text-color: #b3b3b3;
+            --accent-color: #1DB954;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--primary-text-color);
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 600px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            color: var(--accent-color);
+        }
+
+        .user-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .user-list-item a {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            background-color: var(--surface-color);
+            border-radius: 10px;
+            text-decoration: none;
+            color: var(--primary-text-color);
+            transition: background-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .user-list-item a:hover {
+            background-color: #282828;
+            transform: translateY(-3px);
+        }
+
+        .user-list-item i {
+            font-size: 1.5rem;
+            color: var(--secondary-text-color);
+        }
+
+        .user-list-item span {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+    </style>
 </head>
 <body>
-<h1>Start a Conversation</h1>
-<a href="/">Back to Home</a>
+<div class="main-container">
+    <h1><i class="fas fa-headphones-alt"></i> Soundscape Messages</h1>
 
-<div style="margin-top: 2rem;">
-    <h2>Users</h2>
     <div th:if="${users.isEmpty()}">
-        <p>No other users to message.</p>
+        <p style="text-align: center; color: var(--secondary-text-color);">No other users to message.</p>
     </div>
-    <ul>
-        <li th:each="user : ${users}">
-            <a th:href="@{/messages/{username}(username=${user.username})}" th:text="${user.username}">
-                Username
+
+    <ul class="user-list">
+        <li th:each="user : ${users}" class="user-list-item">
+            <a th:href="@{/messages/{username}(username=${user.username})}">
+                <i class="fas fa-user-circle"></i>
+                <span th:text="${user.username}">Username</span>
             </a>
         </li>
     </ul>
