@@ -1,35 +1,196 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Posts - Soundscape</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feed - Soundscape</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        :root {
+            --background-color: #121212;
+            --surface-color: #1E1E1E;
+            --primary-text-color: #FFFFFF;
+            --secondary-text-color: #b3b3b3;
+            --accent-color: #1DB954; /* Spotify-esque green */
+            --input-background: #333333;
+            --border-color: #2a2a2a;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--primary-text-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            background-color: var(--surface-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-logo a {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-text-color);
+            text-decoration: none;
+        }
+
+        .header-logo i {
+            color: var(--accent-color);
+        }
+
+        .nav-links a {
+            color: var(--secondary-text-color);
+            text-decoration: none;
+            margin-left: 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: color 0.2s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-color);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .create-post-card {
+            background-color: var(--surface-color);
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+        }
+
+        .create-post-card textarea {
+            width: 100%;
+            min-height: 80px;
+            background-color: var(--input-background);
+            border: 1px solid transparent;
+            border-radius: 10px;
+            padding: 1rem;
+            color: var(--primary-text-color);
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+
+        .create-post-card textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .create-post-card button {
+            display: block;
+            width: 120px;
+            margin-left: auto;
+            margin-top: 1rem;
+            padding: 0.8rem;
+            border: none;
+            border-radius: 25px;
+            background-color: var(--accent-color);
+            color: var(--primary-text-color);
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .create-post-card button:hover {
+            background-color: #1aa34a;
+        }
+
+        .post-card {
+            background-color: var(--surface-color);
+            border-radius: 15px;
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .post-author {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .post-author i {
+            color: var(--secondary-text-color);
+        }
+
+        .post-timestamp {
+            font-size: 0.8rem;
+            color: var(--secondary-text-color);
+            margin-left: auto;
+        }
+
+        .post-content {
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+    </style>
 </head>
 <body>
-<h1>Posts Page</h1>
-<p>This is the posts page. It works!</p>
-<a href="/">Back to Home</a>
 
-<!--POST CREATION FORM-->
-<form action="/posts" method="post">
-    <input type="text" name="content">
-    <button>Post</button>
-</form>
+<header class="header">
+    <div class="header-logo">
+        <a href="/posts"><i class="fas fa-headphones-alt"></i> Soundscape</a>
+    </div>
+    <nav class="nav-links">
+        <a href="/messages"><i class="fas fa-envelope"></i> Messages</a>
+        <a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </nav>
+</header>
 
-<!--POSTS DISPLAY SECTION -->
-<div style="margin-top: 2rem;">
-    <h2>Recent Posts</h2>
-
-    <!-- Show message if no posts -->
-    <div th:if="${posts.isEmpty()}">
-        <p>No posts yet. Be the first to post something!</p>
+<div class="container">
+    <div class="create-post-card">
+        <form action="/posts" method="post">
+            <textarea name="content" placeholder="What's on your mind?"></textarea>
+            <button type="submit">Post</button>
+        </form>
     </div>
 
-    <!-- Loop through each post from the database -->
-    <div th:each="post : ${posts}" style="border: 1px solid #ccc; padding: 1rem; margin: 1rem 0;">
-        <div style="font-weight: bold;" th:text="${post.author}">Author</div>
-        <div th:text="${post.content}">Post content</div>
-        <div style="font-size: 0.8rem; color: #666;"
-             th:text="${#temporals.format(post.createdAt, 'MMM dd, yyyy HH:mm')}">
-            Timestamp
+    <div class="posts-feed">
+        <div thymeleaf:if="${posts.isEmpty()}" class="post-card">
+            <p>No posts yet. Be the first to share something!</p>
+        </div>
+
+        <div th:each="post : ${posts}" class="post-card">
+            <div class="post-header">
+                <div class="post-author">
+                    <i class="fas fa-user-circle"></i>
+                    <span th:text="${post.author}">Author</span>
+                </div>
+                <div class="post-timestamp"
+                     th:text="${#temporals.format(post.createdAt, 'MMM dd, yyyy HH:mm')}">
+                    Timestamp
+                </div>
+            </div>
+            <p class="post-content" th:text="${post.content}">Post content</p>
         </div>
     </div>
 </div>

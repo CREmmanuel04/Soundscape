@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="'Chat with ' + ${recipient.username}"></title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        :root {
+            --background-color: #121212;
+            --surface-color: #1E1E1E;
+            --primary-text-color: #FFFFFF;
+            --secondary-text-color: #b3b3b3;
+            --accent-color: #1DB954; /* Spotify-esque green */
+            --sent-bubble-color: #2a5a3c;
+            --received-bubble-color: #333333;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--primary-text-color);
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .chat-wrapper {
+            width: 100%;
+            max-width: 800px;
+            height: 90%;
+            background-color: var(--surface-color);
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #2a2a2a;
+            text-align: center;
+        }
+
+        .chat-header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .chat-header a {
+            color: var(--secondary-text-color);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .chat-header a:hover {
+            color: var(--accent-color);
+        }
+
+        .chat-container {
+            flex-grow: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message {
+            max-width: 70%;
+            padding: 0.8rem 1.2rem;
+            border-radius: 20px;
+            line-height: 1.4;
+        }
+
+        .message .sender-name {
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            opacity: 0.8;
+        }
+
+        .sent {
+            background-color: var(--sent-bubble-color);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+
+        .received {
+            background-color: var(--received-bubble-color);
+            color: var(--primary-text-color);
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+
+        #messageForm {
+            display: flex;
+            padding: 1.5rem;
+            gap: 1rem;
+            border-top: 1px solid #2a2a2a;
+        }
+
+        #messageForm input {
+            flex-grow: 1;
+            padding: 0.8rem 1.2rem;
+            border: none;
+            border-radius: 25px;
+            background-color: #333;
+            color: var(--primary-text-color);
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+        }
+
+        #messageForm input:focus {
+            outline: 2px solid var(--accent-color);
+        }
+
+        #messageForm button {
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            background-color: var(--accent-color);
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        #messageForm button:hover {
+            transform: scale(1.1);
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="chat-wrapper">
+    <div class="chat-header">
+        <h1 th:text="'Conversation with ' + ${recipient.username}">Conversation Title</h1>
+        <a href="/messages">
+            <i class="fas fa-arrow-left"></i> Back to User List
+        </a>
+    </div>
+
+    <div id="chatBox" class="chat-container">
+        <div th:each="msg : ${messages}">
+            <div th:class="${msg.sender.id == currentUser.id} ? 'message sent' : 'message received'">
+                <div class="sender-name" th:text="${msg.sender.username}">Sender</div>
+                <div th:text="${msg.content}">Message content</div>
+            </div>
+        </div>
+    </div>
+
+    <form id="messageForm" th:action="@{/messages/{username}(username=${recipient.username})}" method="post">
+        <input type="text" name="content" placeholder="Type a message..." required autocomplete="off">
+        <button type="submit" aria-label="Send Message">
+            <i class="fas fa-paper-plane"></i> </button>
+    </form>
+</div>
+
+<script>
+    // Scroll to the bottom of the chat box on page load
+    const chatBox = document.getElementById('chatBox');
+    chatBox.scrollTop = chatBox.scrollHeight;
+</script>
+</body>
+</html>
