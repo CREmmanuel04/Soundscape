@@ -2,51 +2,194 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Register - Soundscape</title>
+    <link rel="stylesheet" href="styles.css">
     <style>
-        body { font-family: Arial, sans-serif; max-width: 400px; margin: 50px auto; padding: 20px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; }
-        input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
-        button { background: #1da1f2; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
-        .error { color: red; margin-top: 10px; }
-        .success { color: green; margin-top: 10px; }
+        /* Additional styles specific to register page */
+        .register-container {
+            display: flex;
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .register-form-section {
+            width: 100%;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .register-side {
+            width: 60%;
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0 15px 15px 0;
+        }
+
+        .welcome-message {
+            font-size: 1.2em;
+            color: #666;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 10px;
+        }
+
+        .submit-btn:hover {
+            background: #5a6fd8;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .login-link a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        .error {
+            color: #e74c3c;
+            background: #fdf2f2;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #f5c6cb;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .success {
+            color: #27ae60;
+            background: #f2fdf2;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #c6f5c6;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 30px;
+        }
+
+        .feature-list li {
+            padding: 8px 0;
+            color: #666;
+        }
+
+        .feature-list li:before {
+            content: "✓ ";
+            color: #667eea;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
-<h1>Join Soundscape</h1>
+<div class="container register-container">
+    <div class="form-section register-form-section">
+        <h1 class="website-title">Join Soundscape</h1>
+        <p class="tagline">Create your account and start your audio journey</p>
 
-<!-- Error Messages -->
-<div th:if="${param.error != null}" class="error">
-    <span th:if="${param.error[0] == 'empty_fields'}">Please fill in all fields</span>
-    <span th:if="${param.error[0] == 'username_taken'}">Username already taken</span>
-    <span th:if="${param.error[0] == 'email_taken'}">Email already registered</span>
+        <!-- Error Messages -->
+        <div th:if="${param.error != null}" class="error">
+            <span th:if="${param.error[0] == 'empty_fields'}">Please fill in all fields</span>
+            <span th:if="${param.error[0] == 'username_taken'}">Username already taken</span>
+            <span th:if="${param.error[0] == 'email_taken'}">Email already registered</span>
+        </div>
+
+        <!-- Success Message -->
+        <div th:if="${param.registered != null}" class="success">
+            Registration successful! You can now <a href="/login">login</a>.
+        </div>
+
+        <!-- Registration Form -->
+        <form action="/register" method="post" class="login-form">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Choose a username" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="your@email.com" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Create a password" required>
+            </div>
+
+            <button type="submit" class="submit-btn">Create Account</button>
+        </form>
+
+        <div class="login-link">
+            <p>Already have an account? <a href="/login">Sign in here</a></p>
+        </div>
+    </div>
+
+    <div class="animation-section register-side">
+        <div class="welcome-message">
+            <h3>Welcome to Soundscape</h3>
+            <p>Join our community of audio enthusiasts</p>
+            <ul class="feature-list">
+                <li>Create and share soundscapes</li>
+                <li>Discover new audio experiences</li>
+                <li>Connect with other creators</li>
+                <li>Personalize your audio journey</li>
+            </ul>
+        </div>
+    </div>
 </div>
-
-<!-- Success Message -->
-<div th:if="${param.registered != null}" class="success">
-    Registration successful! You can now login.
-</div>
-
-<!-- Registration Form -->
-<form action="/register" method="post">
-    <div class="form-group">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required>
-    </div>
-
-    <div class="form-group">
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required>
-    </div>
-
-    <div class="form-group">
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required>
-    </div>
-    <button type="submit">Create Account</button>
-</form>
-
-<p>Already have an account? <a href="/login">Login here</a></p>
-<p><a href="/">Back to Home</a></p>
 </body>
 </html>
