@@ -175,7 +175,7 @@
     </div>
 
     <div class="posts-feed">
-        <div thymeleaf:if="${posts.isEmpty()}" class="post-card">
+        <div th:if="${posts.isEmpty()}" class="post-card">
             <p>No posts yet. Be the first to share something!</p>
         </div>
 

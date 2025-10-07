@@ -6,12 +6,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
@@ -22,38 +19,30 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-//    @Bean
-//    public InMemoryUserDetailsManager inMemoryUserDetailsManager() {
-//        PasswordEncoder encoder = passwordEncoder();
-//
-//        UserDetails admin = User.builder()
-//                .username("admin")
-//                .password(encoder.encode("password"))
-//                .roles("USER")
-//                .build();
-//        return new InMemoryUserDetailsManager(admin);
-//    }
-
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/register", "/login").permitAll()  // Public pages
-                        .requestMatchers("/", "/posts").authenticated() // Protected pages
-                        .requestMatchers("/h2-console/**").permitAll()  // Allow the console to work
+                        .requestMatchers("/register", "/login", "/css/**", "/js/**").permitAll()
+                        .requestMatchers("/", "/posts", "/messages/**", "/connect-spotify",
+                                "/spotify-success", "/music-matches", "/spotify/**").authenticated()
+                        .requestMatchers("/h2-console/**").permitAll()
                         .anyRequest().permitAll()
                 )
                 .formLogin(form -> form
-                        .loginPage("/login") // Enable custom login page
-                        .defaultSuccessUrl("/", true)  // After login, go to the homepage
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/", true)
                         .permitAll()
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/login")  // Add this line
+                        .defaultSuccessUrl("/link-spotify", true)
+                        .failureUrl("/login?error")  // Add error handling
                 )
                 .logout(logout -> logout
-                        .logoutSuccessUrl("/register")  // After
+                        .logoutSuccessUrl("/login?logout")  // Change to login page
                         .permitAll()
                 )
-                // Disable CSRF protection for now (for H2 console)
                 .csrf(AbstractHttpConfigurer::disable)
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
         return http.build();

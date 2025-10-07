@@ -12,6 +12,9 @@ public interface UserRepository extends JpaRepository<User,Long> {
     // Find user by email (for registration checking)
     Optional<User> findByEmail(String email);
 
+    // Find user by Spotify user ID (for OAuth linking)
+    Optional<User> findBySpotifyUserId(String spotifyUserId);
+
     // Check if username and email exist (for registration validation)
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
