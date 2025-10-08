@@ -1,58 +1,65 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Soundscape</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
     <style>
+        :root {
+            --background-color: #121212;
+            --surface-color: #1E1E1E;
+            --primary-text-color: #FFFFFF;
+            --secondary-text-color: #b3b3b3;
+            --accent-color: #1DB954;
+            --border-color: #2a2a2a;
+            --input-background: #333333;
+        }
+
         body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--primary-text-color);
             margin: 0;
             padding: 0;
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
+            justify-content: center;
         }
 
-        .container {
-            display: flex;
+        .login-container {
             width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
+            max-width: 400px;
+            padding: 2rem;
+        }
+
+        .login-card {
+            background-color: var(--surface-color);
+            padding: 3rem 2rem;
             border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            overflow: hidden;
-            min-height: 500px;
+            border: 1px solid var(--border-color);
+            text-align: center;
         }
 
-        .form-section {
-            width: 40%;
-            padding: 40px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+        .logo {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
         }
 
-        .animation-section {
-            width: 60%;
-            background: #f8f9fa;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
-
-        .website-title {
-            font-size: 2.5em;
-            color: #333;
-            margin-bottom: 10px;
-            font-weight: bold;
+        .logo i {
+            color: var(--accent-color);
         }
 
         .tagline {
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 1.1em;
+            color: var(--secondary-text-color);
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
         }
 
         .login-form {
@@ -60,24 +67,32 @@
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 1.5rem;
+            text-align: left;
         }
 
         input[type="text"],
         input[type="password"] {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #e1e5e9;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s;
+            padding: 1rem;
+            background-color: var(--input-background);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--primary-text-color);
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
             box-sizing: border-box;
         }
 
         input[type="text"]:focus,
         input[type="password"]:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--accent-color);
+        }
+
+        input::placeholder {
+            color: #666;
         }
 
         .password-container {
@@ -86,208 +101,80 @@
 
         .toggle-password {
             position: absolute;
-            right: 12px;
+            right: 1rem;
             top: 50%;
             transform: translateY(-50%);
             background: none;
             border: none;
             cursor: pointer;
-            color: #667eea;
-            font-size: 14px;
+            color: var(--secondary-text-color);
+            font-size: 0.9rem;
             font-weight: 500;
+        }
+
+        .toggle-password:hover {
+            color: var(--accent-color);
         }
 
         .submit-btn {
             width: 100%;
-            padding: 12px;
-            background: #667eea;
-            color: white;
+            padding: 1rem;
+            background-color: var(--accent-color);
+            color: var(--primary-text-color);
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
+            border-radius: 25px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: all 0.2s ease;
+            margin-bottom: 1.5rem;
         }
 
         .submit-btn:hover {
-            background: #5a6fd8;
+            background-color: #1aa34a;
+            transform: translateY(-2px);
         }
 
         .register-link {
             text-align: center;
-            margin-top: 20px;
+            margin-top: 2rem;
+            color: var(--secondary-text-color);
         }
 
         .register-link a {
-            color: #667eea;
+            color: var(--accent-color);
             text-decoration: none;
+            font-weight: 600;
         }
 
         .register-link a:hover {
             text-decoration: underline;
         }
 
-        #speaker-animation {
-            font-size: 120px;
-            transition: all 0.3s ease;
-        }
-
-        /* Animation states for speaker */
-        .speaker-hide {
-            transform: scaleX(-1);
-        }
-
-        .speaker-shake {
-            animation: shake 0.5s;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            75% { transform: translateX(10px); }
-        }
-
-        /*
-        SPEAKER ICON:
-         */
-
-        .speaker-icon {
-            width: 200px;
-            height: 200px;
-            position: relative;
-            transition: all 0.3s ease;
-        }
-
-        .speaker-body {
-            width: 80px;
-            height: 120px;
-            background: #333;
-            position: absolute;
-            left: 60px;
-            top: 40px;
-        }
-
-        /* Trapezoid front */
-        .speaker-front {
-            position: absolute;
-            left: 140px;
-            top: 45px;
-            width: 0;
-            height: 0;
-            border-top: 55px solid transparent;
-            border-left: 30px solid #333;
-            border-bottom: 55px solid transparent;
-        }
-
-        .speaker-bars {
-            position: absolute;
-            left: 175px;
-            top: 50px;
-            display: flex;
-            align-items: center;
-            height: 100px;
-        }
-
-        .bar {
-            background: #333;
-            margin-left: 8px;
-            border-radius: 4px 4px 4px 4px;
-            transition: all 0.3s ease;
-            transform-origin: bottom;
-        }
-
-        /* Curved bars with different heights */
-        .bar-1 {
-            height: 20px;
-            width: 8px;
-            border-radius: 8px 8px 4px 4px;
-        }
-        .bar-2 {
-            height: 40px;
-            width: 8px;
-            border-radius: 8px 8px 4px 4px;
-        }
-        .bar-3 {
-            height: 60px;
-            width: 8px;
-            border-radius: 8px 8px 4px 4px;
-        }
-
-        /* Two-bar state (default) */
-        .speaker-icon.two-bars .bar-3 {
-            height: 0;
-            width: 0;
-            margin-left: 0;
-        }
-
-        /* Three-bar state (typing) */
-        .speaker-icon.three-bars .bar-1 { height: 30px; }
-        .speaker-icon.three-bars .bar-2 { height: 50px; }
-        .speaker-icon.three-bars .bar-3 { height: 70px; }
-
-        /* Hide animation - flip 180 degrees */
-        .speaker-icon.hide {
-            transform: rotate(180deg);
-        }
-
-        /* Add some subtle animation to bars when typing */
-        .speaker-icon.typing .bar {
-            animation: barPulse 0.5s ease-in-out;
-        }
-
-        @keyframes barPulse {
-            0%, 100% { transform: scaleY(1); }
-            50% { transform: scaleY(1.1); }
+        .error-message {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            padding: 1rem;
+            border-radius: 10px;
+            border: 1px solid rgba(220, 53, 69, 0.3);
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
         }
     </style>
-    <script>
-        // Get elements
-        const usernameInput = document.querySelector('input[name="username"]');
-        const passwordInput = document.getElementById('password');
-        const speakerIcon = document.getElementById('speaker-icon');
-
-        // Typing detection
-        let typingTimer;
-        const doneTypingInterval = 500;
-
-        function checkTyping() {
-            speakerIcon.classList.remove('two-bars');
-            speakerIcon.classList.add('three-bars', 'typing');
-
-            clearTimeout(typingTimer);
-            typingTimer = setTimeout(() => {
-                // User stopped typing - revert to two bars
-                speakerIcon.classList.remove('three-bars', 'typing');
-                speakerIcon.classList.add('two-bars');
-            }, doneTypingInterval);
-        }
-
-        // Event listeners for typing
-        usernameInput.addEventListener('input', checkTyping);
-        passwordInput.addEventListener('input', checkTyping);
-
-        // Update togglePassword function
-        function togglePassword() {
-            const passwordInput = document.getElementById('password');
-            const toggleButton = document.querySelector('.toggle-password');
-
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                toggleButton.textContent = 'Hide';
-                speakerIcon.classList.add('hide');
-            } else {
-                passwordInput.type = 'password';
-                toggleButton.textContent = 'Show';
-                speakerIcon.classList.remove('hide');
-            }
-        }
-    </script>
 </head>
 <body>
-<div class="container">
-    <div class="form-section">
-        <h1 class="website-title">Soundscape</h1>
+<div class="login-container">
+    <div class="login-card">
+        <div class="logo">
+            <i class="fas fa-headphones-alt"></i> Soundscape
+        </div>
         <p class="tagline">Immerse yourself in sound</p>
+
+        <!-- Error Message -->
+        <div th:if="${param.error != null}" class="error-message">
+            Invalid username or password
+        </div>
 
         <form method="post" action="/login" class="login-form">
             <div class="form-group">
@@ -308,20 +195,21 @@
             <p>New to Soundscape? <a href="/register">Create an account</a></p>
         </div>
     </div>
-
-    <div class="animation-section">
-        <div class="speaker-icon two-bars" id="speaker-icon">
-            <div class="speaker-body"></div>
-            <div class="speaker-front"></div>
-            <div class="speaker-bars">
-                <div class="bar bar-1"></div>
-                <div class="bar bar-2"></div>
-                <div class="bar bar-3"></div>
-            </div>
-        </div>
-    </div>
 </div>
 
-<script src="script.js"></script>
+<script>
+    function togglePassword() {
+        const passwordInput = document.getElementById('password');
+        const toggleButton = document.querySelector('.toggle-password');
+
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleButton.textContent = 'Hide';
+        } else {
+            passwordInput.type = 'password';
+            toggleButton.textContent = 'Show';
+        }
+    }
+</script>
 </body>
 </html>

@@ -1,61 +1,95 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - Soundscape</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
     <style>
-        /* Additional styles specific to register page */
-        .register-container {
-            display: flex;
-            width: 100%;
-            max-width: 1000px;
-            margin: 0 auto;
+        :root {
+            --background-color: #121212;
+            --surface-color: #1E1E1E;
+            --primary-text-color: #FFFFFF;
+            --secondary-text-color: #b3b3b3;
+            --accent-color: #1DB954;
+            --border-color: #2a2a2a;
+            --input-background: #333333;
         }
 
-        .register-form-section {
-            width: 100%;
-            padding: 40px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .register-side {
-            width: 60%;
-            background: #f8f9fa;
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--primary-text-color);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 0 15px 15px 0;
         }
 
-        .welcome-message {
-            font-size: 1.2em;
-            color: #666;
+        .register-container {
+            width: 100%;
+            max-width: 450px;
+            padding: 2rem;
+        }
+
+        .register-card {
+            background-color: var(--surface-color);
+            padding: 3rem 2rem;
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
             text-align: center;
-            line-height: 1.6;
+        }
+
+        .logo i {
+            color: var(--accent-color);
+        }
+
+        .tagline {
+            color: var(--secondary-text-color);
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
+        .register-form {
+            width: 100%;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 1.5rem;
         }
 
         label {
             display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: #333;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--primary-text-color);
         }
 
         input[type="text"],
         input[type="email"],
         input[type="password"] {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #e1e5e9;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s;
+            padding: 1rem;
+            background-color: var(--input-background);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--primary-text-color);
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
             box-sizing: border-box;
         }
 
@@ -63,34 +97,42 @@
         input[type="email"]:focus,
         input[type="password"]:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--accent-color);
+        }
+
+        input::placeholder {
+            color: #666;
         }
 
         .submit-btn {
             width: 100%;
-            padding: 12px;
-            background: #667eea;
-            color: white;
+            padding: 1rem;
+            background-color: var(--accent-color);
+            color: var(--primary-text-color);
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
+            border-radius: 25px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: background 0.3s;
-            margin-top: 10px;
+            transition: all 0.2s ease;
+            margin: 1rem 0 1.5rem 0;
         }
 
         .submit-btn:hover {
-            background: #5a6fd8;
+            background-color: #1aa34a;
+            transform: translateY(-2px);
         }
 
         .login-link {
             text-align: center;
-            margin-top: 20px;
+            color: var(--secondary-text-color);
         }
 
         .login-link a {
-            color: #667eea;
+            color: var(--accent-color);
             text-decoration: none;
+            font-weight: 600;
         }
 
         .login-link a:hover {
@@ -98,47 +140,52 @@
         }
 
         .error {
-            color: #e74c3c;
-            background: #fdf2f2;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #f5c6cb;
-            margin-bottom: 20px;
-            font-size: 14px;
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            padding: 1rem;
+            border-radius: 10px;
+            border: 1px solid rgba(220, 53, 69, 0.3);
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
         }
 
         .success {
-            color: #27ae60;
-            background: #f2fdf2;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #c6f5c6;
-            margin-bottom: 20px;
-            font-size: 14px;
+            background: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+            padding: 1rem;
+            border-radius: 10px;
+            border: 1px solid rgba(40, 167, 69, 0.3);
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
         }
 
         .feature-list {
             list-style: none;
             padding: 0;
-            margin-top: 30px;
+            margin: 2rem 0;
         }
 
         .feature-list li {
-            padding: 8px 0;
-            color: #666;
+            padding: 0.5rem 0;
+            color: var(--secondary-text-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .feature-list li:before {
-            content: "✓ ";
-            color: #667eea;
+            content: "✓";
+            color: var(--accent-color);
             font-weight: bold;
         }
     </style>
 </head>
 <body>
-<div class="container register-container">
-    <div class="form-section register-form-section">
-        <h1 class="website-title">Join Soundscape</h1>
+<div class="register-container">
+    <div class="register-card">
+        <div class="logo">
+            <i class="fas fa-headphones-alt"></i> Soundscape
+        </div>
         <p class="tagline">Create your account and start your audio journey</p>
 
         <!-- Error Messages -->
@@ -150,11 +197,11 @@
 
         <!-- Success Message -->
         <div th:if="${param.registered != null}" class="success">
-            Registration successful! You can now <a href="/login">login</a>.
+            Registration successful! You can now <a href="/login" style="color: #28a745; font-weight: 600;">login</a>.
         </div>
 
         <!-- Registration Form -->
-        <form action="/register" method="post" class="login-form">
+        <form action="/register" method="post" class="register-form">
             <div class="form-group">
                 <label for="username">Username</label>
                 <input type="text" id="username" name="username" placeholder="Choose a username" required>
@@ -173,21 +220,15 @@
             <button type="submit" class="submit-btn">Create Account</button>
         </form>
 
+        <ul class="feature-list">
+            <li>Connect with Spotify</li>
+            <li>Discover music matches</li>
+            <li>Share your soundscape</li>
+            <li>Join the community</li>
+        </ul>
+
         <div class="login-link">
             <p>Already have an account? <a href="/login">Sign in here</a></p>
-        </div>
-    </div>
-
-    <div class="animation-section register-side">
-        <div class="welcome-message">
-            <h3>Welcome to Soundscape</h3>
-            <p>Join our community of audio enthusiasts</p>
-            <ul class="feature-list">
-                <li>Create and share soundscapes</li>
-                <li>Discover new audio experiences</li>
-                <li>Connect with other creators</li>
-                <li>Personalize your audio journey</li>
-            </ul>
         </div>
     </div>
 </div>
