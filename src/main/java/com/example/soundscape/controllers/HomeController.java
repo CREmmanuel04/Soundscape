@@ -24,13 +24,31 @@ public class HomeController {
                 User user;
 
                 if (authentication instanceof OAuth2AuthenticationToken oauthToken) {
-                    // Handle OAuth user - try to find by username first
-                    String username = authentication.getName();
-                    try {
-                        user = userService.findByUsername(username);
-                    } catch (RuntimeException e) {
-                        // If user not found by username, it's a pure OAuth user
-                        System.out.println("Pure OAuth user detected: " + username);
+                    // Handle OAuth user - try to find by Spotify ID first
+                    String spotifyUserId = oauthToken.getPrincipal().getAttribute("id");
+                    String email = oauthToken.getPrincipal().getAttribute("email");
+
+                    System.out.println("OAuth User - Spotify ID: " + spotifyUserId);
+                    System.out.println("OAuth User - Email: " + email);
+
+                    // First try to find user by Spotify ID
+                    user = userService.findBySpotifyUserId(spotifyUserId);
+
+                    if (user == null && email != null) {
+                        // If no user found by Spotify ID, try by email
+                        user = userService.findByEmail(email);
+                        if (user != null) {
+                            // Link the Spotify account immediately
+                            user.setSpotifyUserId(spotifyUserId);
+                            user.setSpotifyDisplayName(oauthToken.getPrincipal().getAttribute("display_name"));
+                            user.setSpotifyConnectedAt(java.time.Instant.now());
+                            userService.save(user);
+                            System.out.println("Auto-linked Spotify during OAuth login: " + user.getUsername());
+                        }
+                    }
+
+                    if (user == null) {
+                        System.out.println("Pure OAuth user - no local account found");
                         user = null;
                     }
                 } else {
@@ -49,7 +67,7 @@ public class HomeController {
 
     @GetMapping("/spotify-success")
     public String spotifySuccess(OAuth2AuthenticationToken authentication) {
-        System.out.println("=== SPOTIFY SUCCESS ===");
+        System.out.println("=== SPOTIFY SUCCESS DEBUG ===");
         System.out.println("Spotify User ID: " + authentication.getPrincipal().getAttribute("id"));
         System.out.println("Display Name: " + authentication.getPrincipal().getAttribute("display_name"));
         System.out.println("All Attributes: " + authentication.getPrincipal().getAttributes());
