@@ -1,6 +1,9 @@
 package com.example.soundscape.controllers;
 
 import com.example.soundscape.models.Post;
+import com.example.soundscape.models.PostView;
+import com.example.soundscape.models.User;
+import com.example.soundscape.services.UserService;
 import com.example.soundscape.repositories.PostRepository;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,15 +17,29 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class PostController {
     private PostRepository postRepository;
+    private final UserService userService;
 
-    public PostController(PostRepository postRepository) {
+    public PostController(PostRepository postRepository, UserService userService) {
         this.postRepository = postRepository;
+        this.userService = userService;
     }
 
     @GetMapping("/posts")
     public String postsPage(Model model) {
-        // Get all posts from that database and pass to the posts template
-        model.addAttribute("posts", postRepository.findAllByOrderByCreatedAtDesc());
+        // Convert Post -> PostView (adds avatar url)
+        var posts = postRepository.findAllByOrderByCreatedAtDesc();
+        var views = posts.stream().map(p -> {
+            String avatar = null;
+            try {
+                User u = userService.findByUsername(p.getAuthor());
+                avatar = u.getProfilePicture();
+            } catch (RuntimeException e) {
+                // user not found, leave avatar null
+            }
+            return new PostView(p, avatar);
+        }).toList();
+
+        model.addAttribute("posts", views);
         return "posts"; // Looks for posts.html
     }
 

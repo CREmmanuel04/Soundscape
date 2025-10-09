@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Edit Profile</title>
+    <link rel="stylesheet" th:href="@{/css/site.css}" />
+</head>
+<body>
+<h1>Edit Profile</h1>
+
+<div th:if="${param.success}">
+    <p style="color:green">Profile updated successfully.</p>
+</div>
+
+<form th:action="@{/profile/edit}" method="post" enctype="multipart/form-data">
+    <div>
+        <label>Profile picture</label><br/>
+        <div th:if="${user.profilePicture}">
+            <img th:src="${user.profilePicture}" alt="Profile" style="max-width:150px;max-height:150px;"/>
+        </div>
+        <input type="file" name="profilePicture" accept="image/*" />
+    </div>
+
+    <div>
+        <label>Banner</label><br/>
+        <div th:if="${user.banner}">
+            <img th:src="${user.banner}" alt="Banner" style="max-width:600px;max-height:200px;"/>
+        </div>
+        <input type="file" name="banner" accept="image/*" />
+    </div>
+
+    <div>
+        <label>Bio</label><br/>
+        <textarea name="bio" rows="6" cols="60" th:text="${user.bio}"></textarea>
+    </div>
+
+    <button type="submit">Save Profile</button>
+</form>
+
+<p><a th:href="@{/}">Back to home</a></p>
+</body>
+</html>

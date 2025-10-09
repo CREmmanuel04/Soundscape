@@ -1,0 +1,115 @@
+:root {
+  --background-color: #121212;
+  --surface-color: #1E1E1E;
+  --primary-text-color: #FFFFFF;
+  --secondary-text-color: #b3b3b3;
+  --accent-color: #1DB954;
+  --muted: #2a2a2a;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: var(--background-color);
+  color: var(--primary-text-color);
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  width: 100%;
+  max-width: 900px;
+  margin: 3rem auto;
+  padding: 0 1rem;
+}
+
+.card {
+  background: var(--surface-color);
+  padding: 1.25rem;
+  border-radius: 12px;
+  border: 1px solid var(--muted);
+}
+
+.header {
+  background-color: var(--surface-color);
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--muted);
+}
+
+.header-logo a {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--primary-text-color);
+  text-decoration: none;
+}
+
+.nav-links a {
+  color: var(--secondary-text-color);
+  text-decoration: none;
+  margin-left: 1rem;
+}
+
+.profile-banner {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #111, #222);
+}
+
+.profile-top {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+  margin-top: -70px;
+}
+
+.avatar {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid var(--background-color);
+  background: #fff;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-info h2 { margin: 0; }
+.profile-info p { color: var(--secondary-text-color); margin: 0.25rem 0; }
+
+.bio {
+  margin-top: 1rem;
+  background: rgba(255,255,255,0.02);
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.edit-link {
+  color: var(--accent-color);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.btn { display:inline-block; padding:0.6rem 1rem; border-radius:8px; text-decoration:none; }
+.btn-primary { background: var(--accent-color); color: #fff; }
+
+/* Small icon spacing inside buttons */
+.btn .fa {
+  margin-right: 0.5rem;
+}
+
+/* subtle hover for primary buttons */
+.btn { transition: transform 0.08s ease, box-shadow 0.12s ease; }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(17,187,77,0.12); }
+
+@media (max-width:600px){
+  .profile-top { flex-direction: column; align-items: center; margin-top: -40px; }
+  .avatar { width: 100px; height: 100px; }
+}

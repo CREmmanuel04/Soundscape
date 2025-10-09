@@ -76,7 +76,8 @@
     </style>
 </head>
 <body>
-<div class="main-container">
+<div th:replace="fragments/header :: siteHeader(${user})"></div>
+<div class="main-container" style="margin-top:2rem;">
     <h1><i class="fas fa-headphones-alt"></i> Soundscape Messages</h1>
 
     <div th:if="${users.isEmpty()}">
@@ -85,10 +86,13 @@
 
     <ul class="user-list">
         <li th:each="user : ${users}" class="user-list-item">
-            <a th:href="@{/messages/{username}(username=${user.username})}">
-                <i class="fas fa-user-circle"></i>
-                <span th:text="${user.username}">Username</span>
-            </a>
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+                <a th:href="@{/messages/{username}(username=${user.username})}" style="display:flex;align-items:center;text-decoration:none;color:inherit;">
+                    <img th:src="${user.profilePicture != null} ? ${user.profilePicture} : @{/images/default-avatar.svg}" alt="avatar" style="width:40px;height:40px;border-radius:50%;margin-right:0.75rem;"/>
+                    <span th:text="${user.username}">Username</span>
+                </a>
+                <a th:href="@{/messages/{username}(username=${user.username})}" class="btn btn-primary"><i class="fa fa-envelope"></i> Message</a>
+            </div>
         </li>
     </ul>
 </div>

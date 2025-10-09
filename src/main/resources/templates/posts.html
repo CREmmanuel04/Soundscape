@@ -156,15 +156,7 @@
 </head>
 <body>
 
-<header class="header">
-    <div class="header-logo">
-        <a href="/posts"><i class="fas fa-headphones-alt"></i> Soundscape</a>
-    </div>
-    <nav class="nav-links">
-        <a href="/messages"><i class="fas fa-envelope"></i> Messages</a>
-        <a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
-    </nav>
-</header>
+<div th:replace="fragments/header :: siteHeader(${user})"></div>
 
 <div class="container">
     <div class="create-post-card">
@@ -179,18 +171,24 @@
             <p>No posts yet. Be the first to share something!</p>
         </div>
 
-        <div th:each="post : ${posts}" class="post-card">
+        <div th:each="pv : ${posts}" class="post-card">
             <div class="post-header">
-                <div class="post-author">
-                    <i class="fas fa-user-circle"></i>
-                    <span th:text="${post.author}">Author</span>
+                <div style="display:flex;align-items:center;gap:0.75rem;">
+                        <a th:href="@{/profile/{username}(username=${pv.post.author})}" style="display:block;width:40px;height:40px;">
+                            <div style="width:40px;height:40px;border-radius:50%;overflow:hidden;background:#fff;">
+                                <img th:src="${pv.avatarUrl != null} ? ${pv.avatarUrl} : @{/images/default-avatar.svg}" alt="avatar" style="width:100%;height:100%;object-fit:cover;"/>
+                            </div>
+                        </a>
+                    <div class="post-author">
+                        <span th:text="${pv.post.author}">Author</span>
+                    </div>
                 </div>
                 <div class="post-timestamp"
-                     th:text="${#temporals.format(post.createdAt, 'MMM dd, yyyy HH:mm')}">
+                     th:text="${#temporals.format(pv.post.createdAt, 'MMM dd, yyyy HH:mm')}">
                     Timestamp
                 </div>
             </div>
-            <p class="post-content" th:text="${post.content}">Post content</p>
+            <p class="post-content" th:text="${pv.post.content}">Post content</p>
         </div>
     </div>
 </div>

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="siteHeader(user)">
+    <header class="header">
+        <div class="header-logo">
+            <a th:href="@{/}"><i class="fas fa-headphones-alt"></i> Soundscape</a>
+        </div>
+        <nav class="nav-links">
+            <a href="/messages"><i class="fas fa-envelope"></i> Messages</a>
+            <a th:if="${user != null}" th:href="@{/profile/edit}"><i class="fas fa-user-cog"></i> Edit Profile</a>
+            <a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </nav>
+    </header>
+</div>
+</body>
+</html>

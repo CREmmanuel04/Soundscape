@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title th:text="${user.username} + ' — Profile'">Profile</title>
+    <link rel="stylesheet" th:href="@{/css/site.css}" />
+</head>
+<body>
+<div th:replace="fragments/header :: siteHeader(${user})"></div>
+
+<div class="container">
+    <div class="card">
+        <div th:if="${user.banner}">
+            <img th:src="${user.banner}" alt="Banner" class="profile-banner"/>
+        </div>
+
+        <div class="profile-top">
+            <div class="avatar">
+                <img th:if="${user.profilePicture}" th:src="${user.profilePicture}" alt="Avatar"/>
+                <div th:if="${user.profilePicture == null}" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#ddd;color:#333;">No image</div>
+            </div>
+            <div class="profile-info">
+                <h2 th:text="${user.username}">Username</h2>
+                <p th:text="${user.spotifyDisplayName}"></p>
+                <p style="margin-top:0.5rem;"><a th:href="@{/profile/edit}" class="edit-link">Edit profile</a></p>
+            </div>
+        </div>
+
+        <div class="bio">
+            <h3>Bio</h3>
+            <p th:if="${user.bio != null}" th:text="${user.bio}"></p>
+            <p th:if="${user.bio == null}" style="color:var(--secondary-text-color)">No bio yet.</p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -40,6 +40,16 @@ public class User {
     @Column(name = "spotify_connected_at")
     private Instant spotifyConnectedAt;
 
+    // Profile fields
+    @Column(name = "profile_picture")
+    private String profilePicture;
+
+    @Column(name = "banner")
+    private String banner;
+
+    @Column(name = "bio", length = 2000)
+    private String bio;
+
     public User() {}
 
     // Constructor for registration (without Spotify)
@@ -94,4 +104,14 @@ public class User {
     public boolean isSpotifyConnected() {
         return spotifyAccessToken != null && !spotifyAccessToken.isEmpty();
     }
+
+    // Profile getters/setters
+    public String getProfilePicture() { return profilePicture; }
+    public void setProfilePicture(String profilePicture) { this.profilePicture = profilePicture; }
+
+    public String getBanner() { return banner; }
+    public void setBanner(String banner) { this.banner = banner; }
+
+    public String getBio() { return bio; }
+    public void setBio(String bio) { this.bio = bio; }
 }

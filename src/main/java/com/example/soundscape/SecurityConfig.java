@@ -23,9 +23,9 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/register", "/login", "/css/**", "/js/**").permitAll()
+                        .requestMatchers("/register", "/login", "/css/**", "/js/**", "/uploads/**").permitAll()
                         .requestMatchers("/", "/posts", "/messages/**", "/connect-spotify",
-                                "/spotify-success", "/music-matches", "/spotify/**").authenticated()
+                                "/spotify-success", "/music-matches", "/spotify/**", "/profile/**").authenticated()
                         .requestMatchers("/h2-console/**").permitAll()
                         .anyRequest().permitAll()
                 )

@@ -153,15 +153,7 @@
     </style>
 </head>
 <body>
-<header class="header">
-    <div class="header-logo">
-        <a href="/posts"><i class="fas fa-headphones-alt"></i> Soundscape</a>
-    </div>
-    <nav class="nav-links">
-        <a href="/messages"><i class="fas fa-envelope"></i> Messages</a>
-        <a th:href="@{/logout}"><i class="fas fa-sign-out-alt"></i> Logout</a>
-    </nav>
-</header>
+<div th:replace="fragments/header :: siteHeader(${user})"></div>
 
 <div class="container">
     <div class="composer">
