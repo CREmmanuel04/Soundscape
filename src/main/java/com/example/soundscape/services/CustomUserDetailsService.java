@@ -1,5 +1,6 @@
 package com.example.soundscape.services;
 
+import com.example.soundscape.auth.SoundscapeUserPrincipal;
 import com.example.soundscape.models.User;
 import com.example.soundscape.repositories.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,10 +22,17 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
-        return org.springframework.security.core.userdetails.User.builder()
-                .username(user.getUsername())
-                .password(user.getPassword())
-                .roles("USER")
-                .build();
+        // Return our unified principal instead of Spring's default User
+        return new SoundscapeUserPrincipal(user);
+    }
+
+    /**
+     * Additional method to load user by email for OAuth integration
+     */
+    public UserDetails loadUserByEmail(String email) throws UsernameNotFoundException {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+
+        return new SoundscapeUserPrincipal(user);
     }
 }
