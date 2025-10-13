@@ -136,6 +136,55 @@
             transform: translateY(-2px);
         }
 
+        .spotify-btn {
+            width: 100%;
+            padding: 1rem;
+            background-color: #1DB954;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 1.5rem;
+            text-decoration: none;
+            display: block;
+            box-sizing: border-box;
+        }
+
+        .spotify-btn:hover {
+            background-color: #1aa34a;
+            transform: translateY(-2px);
+        }
+
+        .spotify-btn i {
+            margin-right: 0.5rem;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 1.5rem 0;
+            color: var(--secondary-text-color);
+        }
+
+        .divider::before,
+        .divider::after {
+            content: "";
+            flex: 1;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .divider::before {
+            margin-right: 1rem;
+        }
+
+        .divider::after {
+            margin-left: 1rem;
+        }
+
         .register-link {
             text-align: center;
             margin-top: 2rem;
@@ -190,6 +239,12 @@
 
             <button type="submit" class="submit-btn">Login</button>
         </form>
+
+        <div class="divider">or</div>
+
+        <a href="http://127.0.0.1:8080/connect-spotify" class="spotify-btn">
+            <i class="fab fa-spotify"></i> Continue with Spotify
+        </a>
 
         <div class="register-link">
             <p>New to Soundscape? <a href="/register">Create an account</a></p>
