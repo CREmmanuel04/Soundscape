@@ -14,8 +14,7 @@ public class UserService {
     }
 
     public User findByUsername(String username) {
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+        return userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found: " + username));
     }
 
     public User findByEmail(String email) {
@@ -25,6 +24,7 @@ public class UserService {
     public User findBySpotifyUserId(String spotifyUserId) {
         return userRepository.findBySpotifyUserId(spotifyUserId).orElse(null);
     }
+
     // You can add other user-related methods here
     public User save(User user) {
         return userRepository.save(user);

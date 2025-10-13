@@ -19,6 +19,7 @@ public class SecurityConfig {
 
     public SecurityConfig(CustomOAuth2UserService customOAuth2UserService) {
         this.customOAuth2UserService = customOAuth2UserService;
+        System.out.println("=== SECURITY CONFIG LOADED WITH CUSTOM OAUTH2 SERVICE ===");
     }
 
     @Bean
@@ -30,8 +31,9 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/register", "/login", "/css/**", "/js/**").permitAll()
-                        .requestMatchers("/", "/posts", "/messages/**", "/connect-spotify",
+                        .requestMatchers("/register", "/login", "/css/**", "/js/**", "/oauth2/**",
+                                "/login/oauth2/**", "/connect-spotify").permitAll()  // ADD THIS
+                        .requestMatchers("/", "/posts", "/messages/**",
                                 "/spotify-success", "/music-matches", "/spotify/**").authenticated()
                         .requestMatchers("/h2-console/**").permitAll()
                         .anyRequest().permitAll()
@@ -43,10 +45,10 @@ public class SecurityConfig {
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/login")
-                        .defaultSuccessUrl("/", true)  // Changed from /link-spotify
-                        .failureUrl("/login?error")
+                        .defaultSuccessUrl("/spotify-success", true)
+                        .failureUrl("/login?error&oauth2Error=true")  // This will help us identify OAuth vs form login errors
                         .userInfoEndpoint(userInfo -> userInfo
-                                .userService(customOAuth2UserService)  // Use our custom service!
+                                .userService(customOAuth2UserService)
                         )
                 )
                 .logout(logout -> logout
@@ -55,6 +57,7 @@ public class SecurityConfig {
                 )
                 .csrf(AbstractHttpConfigurer::disable)
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
+
         return http.build();
     }
 }
