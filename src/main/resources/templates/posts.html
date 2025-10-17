@@ -15,9 +15,10 @@
             --surface-color: #1E1E1E;
             --primary-text-color: #FFFFFF;
             --secondary-text-color: #b3b3b3;
-            --accent-color: #1DB954; /* Spotify-esque green */
+            --accent-color: #1DB954;
             --input-background: #333333;
             --border-color: #2a2a2a;
+            --like-color: #e74c3c;
         }
 
         body {
@@ -122,7 +123,7 @@
             background-color: var(--surface-color);
             border-radius: 15px;
             margin-bottom: 1.5rem;
-            padding: 1.5rem;
+            padding: 1.5rem 1.5rem 0.75rem 1.5rem; /* top, right, bottom, left */
         }
 
         .post-header {
@@ -145,13 +146,120 @@
             font-size: 0.8rem;
             color: var(--secondary-text-color);
             margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 1rem; /* Increased spacing between timestamp elements */
         }
 
         .post-content {
             font-size: 1rem;
             line-height: 1.6;
+            margin-bottom: 1.5rem;
         }
 
+        .post-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 0.75rem;  /* Reduced from 1rem */
+            margin-top: 0.5rem;    /* Added some top margin */
+        }
+
+        .like-btn {
+            background: none;
+            border: none;
+            color: var(--secondary-text-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            padding: 0.5rem;
+            border-radius: 8px;
+        }
+
+        .like-btn:hover {
+            background-color: rgba(231, 76, 60, 0.1);
+        }
+
+        .like-btn.liked {
+            color: var(--like-color);
+        }
+
+        .like-btn.liked i {
+            color: var(--like-color);
+        }
+
+        .like-btn i {
+            font-size: 1.1rem;
+            transition: color 0.2s ease;
+        }
+
+        /* 3-DOT MENU STYLES */
+        .menu-btn {
+            background: none;
+            border: none;
+            color: var(--secondary-text-color);
+            cursor: pointer;
+            padding: 0.6rem; /* 2x size from original 0.3rem */
+            border-radius: 6px; /* Slightly larger radius */
+            transition: all 0.2s ease;
+            font-size: 1.2rem; /* Larger dots */
+        }
+
+        .menu-btn:hover {
+            background: var(--input-background);
+            color: var(--primary-text-color);
+        }
+
+        .menu-dropdown {
+            position: absolute;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.8rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+            min-width: 250px; /* Increased width for better text box */
+            margin-top: 0.5rem; /* More space below button */
+            right: 0; /* Align to right */
+        }
+
+        .menu-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .menu-item input {
+            width: 100%;
+            max-width: 250px; /* Prevent text box from running off right side */
+            padding: 0.5rem;
+            background: var(--input-background);
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            color: var(--primary-text-color);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            box-sizing: border-box; /* Ensure padding doesn't cause overflow */
+        }
+
+        .menu-item button {
+            width: 100%;
+            border: none;
+            color: white;
+            padding: 0.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .post-menu {
+            position: relative;
+            display: inline-block;
+            margin-left: 1rem; /* Added space between timestamp and menu */
+        }
     </style>
 </head>
 <body>
@@ -167,16 +275,38 @@
 </header>
 
 <div class="container">
+    <!-- SEARCH BAR -->
+    <div class="search-card" style="background-color: var(--surface-color); padding: 1rem; border-radius: 15px; margin-bottom: 1rem;">
+        <form action="/posts/search" method="get">
+            <input type="text" name="q" placeholder="🔍 Search posts..."
+                   th:value="${param.q}"
+                   style="width: 100%; padding: 0.8rem; background-color: var(--input-background); border: 1px solid var(--border-color); border-radius: 10px; color: var(--primary-text-color); font-family: 'Poppins', sans-serif; box-sizing: border-box;">
+            <!-- CLEAR SEARCH BUTTON -->
+            <div th:if="${param.q != null}" style="margin-top: 0.5rem; text-align: center;">
+                <a href="/posts" style="color: var(--accent-color); text-decoration: none; font-size: 0.9rem; display: inline-block; padding: 0.3rem 1rem; border: 1px solid var(--accent-color); border-radius: 15px;">
+                    Clear search
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- CREATE POST CARD WITH CHARACTER COUNTER -->
     <div class="create-post-card">
-        <form action="/posts" method="post">
-            <textarea name="content" placeholder="What's on your mind?"></textarea>
-            <button type="submit">Post</button>
+        <form action="/posts" method="post" id="postForm">
+            <textarea name="content" placeholder="What's on your mind?" id="postTextarea" onkeydown="handleEnterKey(event)" maxlength="280"></textarea>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
+                <div style="color: var(--secondary-text-color); font-size: 0.8rem;">
+                    <span id="charCount">0</span>/280
+                </div>
+                <button type="submit">Post</button>
+            </div>
         </form>
     </div>
 
     <div class="posts-feed">
         <div th:if="${posts.isEmpty()}" class="post-card">
-            <p>No posts yet. Be the first to share something!</p>
+            <p th:if="${param.q != null}">No posts found for "<span th:text="${param.q}"></span>"</p>
+            <p th:if="${param.q == null}">No posts yet. Be the first to share something!</p>
         </div>
 
         <div th:each="post : ${posts}" class="post-card">
@@ -184,16 +314,100 @@
                 <div class="post-author">
                     <i class="fas fa-user-circle"></i>
                     <span th:text="${post.author}">Author</span>
+                    <span th:if="${post.author == #authentication.principal.username}"
+                          style="color: var(--accent-color); margin-left: 0.3rem; font-size: 0.8rem;">
+                        (you)
+                    </span>
                 </div>
-                <div class="post-timestamp"
-                     th:text="${#temporals.format(post.createdAt, 'MMM dd, yyyy HH:mm')}">
-                    Timestamp
+                <div class="post-timestamp">
+                    <span th:text="${@timeFormatter.format(post.createdAt)}">Timestamp</span>
+                    <span th:if="${post.edited}" style="color: var(--secondary-text-color); font-size: 0.7rem;">
+                        (edited)
+                    </span>
+
+                    <!-- 3-DOT MENU BUTTON (ONLY FOR OWN POSTS) -->
+                    <div th:if="${post.author == #authentication.principal.username}" class="post-menu">
+                        <button type="button" class="menu-btn" th:onclick="|toggleMenu('menu-${post.id}')|">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <div th:id="'menu-' + ${post.id}" class="menu-dropdown" style="display: none;">
+                            <!-- INLINE EDIT FORM -->
+                            <form th:action="@{/posts/{id}/edit(id=${post.id})}" method="post" class="menu-item">
+                                <input type="text" name="content" th:value="${post.content}">
+                                <button type="submit" style="background: var(--accent-color);">
+                                    Save Edit
+                                </button>
+                            </form>
+
+                            <!-- DELETE BUTTON -->
+                            <form th:action="@{/posts/{id}/delete(id=${post.id})}" method="post" class="menu-item">
+                                <button type="submit" style="background: #e74c3c;"
+                                        onclick="return confirm('Delete this post?')">
+                                    Delete Post
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
             <p class="post-content" th:text="${post.content}">Post content</p>
+            <div class="post-actions">
+                <!-- LIKE BUTTON -->
+                <form th:action="@{/posts/{id}/like(id=${post.id})}" method="post" style="display: inline;">
+                    <button type="submit" class="like-btn" th:classappend="${post.likedBy.contains(#authentication.principal.username)} ? 'liked'">
+                        <i th:class="${post.likedBy.contains(#authentication.principal.username)} ? 'fas fa-heart' : 'far fa-heart'"></i>
+                        <span th:text="${post.likeCount}">0</span>
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 </div>
+
+<script>
+    function handleEnterKey(event) {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            document.getElementById('postForm').submit();
+        }
+    }
+
+    // CHARACTER COUNTER
+    document.addEventListener('DOMContentLoaded', function() {
+        const textarea = document.getElementById('postTextarea');
+        const counter = document.getElementById('charCount');
+
+        if (textarea && counter) {
+            textarea.addEventListener('input', function() {
+                counter.textContent = this.value.length;
+            });
+            counter.textContent = textarea.value.length;
+        }
+    });
+
+    // MENU TOGGLE FUNCTION
+    function toggleMenu(menuId) {
+        const menu = document.getElementById(menuId);
+        const isVisible = menu.style.display === 'block';
+
+        // Close all other menus
+        document.querySelectorAll('.menu-dropdown').forEach(m => {
+            m.style.display = 'none';
+        });
+
+        // Toggle this menu
+        menu.style.display = isVisible ? 'none' : 'block';
+    }
+
+    // Close menus when clicking outside
+    document.addEventListener('click', function(event) {
+        if (!event.target.closest('.post-menu')) {
+            document.querySelectorAll('.menu-dropdown').forEach(menu => {
+                menu.style.display = 'none';
+            });
+        }
+    });
+</script>
 
 </body>
 </html>
