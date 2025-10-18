@@ -284,6 +284,36 @@
         } else {
             playPauseIcon.className = 'fas fa-pause';
         }
+
+        // Update track info if track changed
+        updateTrackInfo(state.track_window.current_track);
+    }
+
+    // Update track display with current track info
+    function updateTrackInfo(track) {
+        if (!track) return;
+
+        console.log('Updating track info:', track.name); // Debug log
+
+        // Update track name - select the h3 element
+        const trackNameEl = document.querySelector('.track-info h3');
+        if (trackNameEl) trackNameEl.textContent = track.name;
+
+        // Update artist name - select the paragraph that starts with "by"
+        const artistNameEl = document.querySelector('.track-info p[style*="color: #b3b3b3"]');
+        if (artistNameEl && track.artists.length > 0) {
+            artistNameEl.textContent = 'by ' + track.artists[0].name;
+        }
+
+        // Update album name - select the paragraph with smaller font
+        const albumNameEl = document.querySelector('.track-info p[style*="font-size: 0.9rem"]');
+        if (albumNameEl) albumNameEl.textContent = 'from ' + track.album.name;
+
+        // Update album image - select the img element
+        const albumImageEl = document.querySelector('.track-info img');
+        if (albumImageEl && track.album.images.length > 0) {
+            albumImageEl.src = track.album.images[0].url;
+        }
     }
 
     // Update progress bar in real-time
