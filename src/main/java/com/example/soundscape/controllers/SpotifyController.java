@@ -24,7 +24,6 @@ public class SpotifyController {
         this.spotifyService = spotifyService;
     }
 
-    // Simple now-playing page
     @GetMapping("/now-playing")
     public String nowPlaying(@AuthenticationPrincipal UserDetails userDetails, Model model) {
         if (userDetails == null) {
@@ -44,8 +43,45 @@ public class SpotifyController {
                 model.addAttribute("spotifyProfile", spotifyProfile);
 
                 // Get parsed currently playing track
-                Map<String, String> currentlyPlaying = spotifyService.getCurrentlyPlaying(user.getSpotifyAccessToken());
-                model.addAttribute("trackInfo", currentlyPlaying);
+                Map<String, String> trackInfo = spotifyService.getCurrentlyPlaying(user.getSpotifyAccessToken());
+
+                // === NEW LOGIC START: Fallback to recently played ===
+                if ("false".equals(trackInfo.get("isPlaying"))) {
+                    try {
+                        // Fetch 1 recent track
+                        Map<String, Object> recentHistory = spotifyService.getRecentlyPlayed(user.getSpotifyAccessToken(), 1);
+
+                        // Safe casting to get the list of tracks
+                        @SuppressWarnings("unchecked")
+                        java.util.List<Map<String, Object>> tracks = (java.util.List<Map<String, Object>>) recentHistory.get("tracks");
+
+                        if (tracks != null && !tracks.isEmpty()) {
+                            Map<String, Object> lastTrack = tracks.get(0);
+
+                            // Map recent track data to the format 'now-playing.html' expects
+                            trackInfo.put("trackName", (String) lastTrack.get("name"));
+                            trackInfo.put("albumName", (String) lastTrack.get("album_name"));
+                            trackInfo.put("albumImage", (String) lastTrack.get("image_url"));
+
+                            // Handle artist list safely
+                            @SuppressWarnings("unchecked")
+                            java.util.List<String> artists = (java.util.List<String>) lastTrack.get("artists");
+                            if (artists != null && !artists.isEmpty()) {
+                                trackInfo.put("artistName", artists.get(0));
+                            }
+
+                            // Add a special flag so we can change the UI text later if we want
+                            trackInfo.put("isRecent", "true");
+                            // We set isPlaying to true so the player SHOWS the info, even though it's paused
+                            trackInfo.put("isPlaying", "true");
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Error fetching fallback recent track: " + e.getMessage());
+                    }
+                }
+                // === NEW LOGIC END ===
+
+                model.addAttribute("trackInfo", trackInfo);
 
                 // Pass user to frontend (for now-playing.html)
                 model.addAttribute("user", user);

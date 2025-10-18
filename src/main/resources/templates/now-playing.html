@@ -84,7 +84,10 @@
 <body>
 <div class="container">
     <h1><i class="fab fa-spotify" style="color: #1DB954;"></i> Soundscape</h1>
-    <h2>Now Playing</h2>
+    <h2 id="playerStatusHeader"
+        th:text="${trackInfo != null && trackInfo['isRecent'] == 'true'} ? 'Last Played' : 'Now Playing'">
+        Now Playing
+    </h2>
 
     <div th:if="${connected}">
         <!-- Connection Status Box -->
@@ -319,11 +322,17 @@
     function updatePlayerUI(state) {
         const playPauseBtn = document.getElementById('playPauseBtn');
         const playPauseIcon = playPauseBtn.querySelector('i');
+        const header = document.getElementById('playerStatusHeader'); // <--- NEW LINE
 
         if (state.paused) {
             playPauseIcon.className = 'fas fa-play';
         } else {
             playPauseIcon.className = 'fas fa-pause';
+
+            // <--- NEW LOGIC: If we are playing, we are definitely "Now Playing"
+            if (header) {
+                header.textContent = "Now Playing";
+            }
         }
 
         // Update track info if track changed
