@@ -46,6 +46,38 @@
             border-radius: 10px;
             margin: 2rem 0;
         }
+
+        .control-btn {
+            background: #333;
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s ease;
+        }
+
+        .control-btn:hover {
+            background: #444;
+        }
+
+        .control-btn i {
+            font-size: 1rem;
+        }
+
+        #playPauseBtn {
+            background: #1DB954;
+            width: 50px;
+            height: 50px;
+        }
+
+        #playPauseBtn:hover {
+            background: #1ed760;
+        }
     </style>
 </head>
 <body>
@@ -61,13 +93,52 @@
             </p>
         </div>
 
-        <div class="track-info" th:if="${trackInfo.isPlaying == 'true'}" style="display: flex; align-items: center; gap: 1.5rem; text-align: left;">
-            <img th:src="${trackInfo.albumImage}" style="width: 120px; height: 120px; border-radius: 8px; flex-shrink: 0;">
-            <div>
-                <p style="margin: 0 0 0.5rem 0;">You are currently listening to:</p>
-                <h3 style="margin: 0 0 0.3rem 0;" th:text="${trackInfo.trackName}">Track Name</h3>
-                <p style="color: #b3b3b3; margin: 0 0 0.2rem 0;" th:text="${'by ' + trackInfo.artistName}">Artist Name</p>
-                <p style="color: #888; font-size: 0.9rem; margin: 0;" th:text="${'from ' + trackInfo.albumName}">Album Name</p>
+        <div class="track-info" th:if="${trackInfo.isPlaying == 'true'}">
+            <!-- Track Display -->
+            <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem; text-align: left;">
+                <img th:src="${trackInfo.albumImage}" style="width: 120px; height: 120px; border-radius: 8px; flex-shrink: 0;">
+                <div>
+                    <h3 style="margin: 0 0 0.3rem 0;" th:text="${trackInfo.trackName}">Track Name</h3>
+                    <p style="color: #b3b3b3; margin: 0 0 0.2rem 0;" th:text="${'by ' + trackInfo.artistName}">Artist Name</p>
+                    <p style="color: #888; font-size: 0.9rem; margin: 0;" th:text="${'from ' + trackInfo.albumName}">Album Name</p>
+                </div>
+            </div>
+
+            <!-- Playback Controls Area -->
+            <div style="border-top: 1px solid #444; padding-top: 1.5rem;">
+                <!-- Control Buttons Row -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <!-- Playback Buttons -->
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <button class="control-btn" id="prevBtn">
+                            <i class="fas fa-step-backward"></i>
+                        </button>
+                        <button class="control-btn" id="playPauseBtn">
+                            <i class="fas fa-pause"></i>
+                        </button>
+                        <button class="control-btn" id="nextBtn">
+                            <i class="fas fa-step-forward"></i>
+                        </button>
+                    </div>
+
+                    <!-- Volume Control -->
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-volume-down" style="color: #b3b3b3;"></i>
+                        <input type="range" id="volumeSlider" min="0" max="100" value="50"
+                               style="width: 100px; accent-color: #1DB954;">
+                        <i class="fas fa-volume-up" style="color: #b3b3b3;"></i>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <span id="currentTime" style="color: #b3b3b3; font-size: 0.8rem; min-width: 40px; line-height: 1;">0:00</span>
+                    <div style="flex-grow: 1; position: relative; display: flex; align-items: center;">
+                        <input type="range" id="progressBar" min="0" max="100" value="0"
+                               style="width: 100%; accent-color: #1DB954; height: 4px;">
+                    </div>
+                    <span id="totalTime" style="color: #b3b3b3; font-size: 0.8rem; min-width: 40px; line-height: 1;">0:00</span>
+                </div>
             </div>
         </div>
 
