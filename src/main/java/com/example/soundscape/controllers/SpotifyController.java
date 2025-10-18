@@ -47,6 +47,9 @@ public class SpotifyController {
                 // Get parsed currently playing track
                 Map<String, String> currentlyPlaying = spotifyService.getCurrentlyPlaying(user.getSpotifyAccessToken());
                 model.addAttribute("trackInfo", currentlyPlaying);
+
+                // Pass user to frontend (for now-playing.html)
+                model.addAttribute("user", user);
             }
         } else {
             model.addAttribute("connected", false);

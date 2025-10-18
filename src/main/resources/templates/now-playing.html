@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Now Playing - Soundscape</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://sdk.scdn.co/spotify-player.js"></script>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -159,5 +160,148 @@
         <a href="/posts" style="color: #1DB954;">← Back to Feed</a>
     </div>
 </div>
+<script>
+    // Spotify Web Playback SDK setup
+    window.onSpotifyWebPlaybackSDKReady = () => {
+        const token = '[[${user.spotifyAccessToken}]]'; // We'll need to pass the token from backend
+
+        const player = new Spotify.Player({
+            name: 'Soundscape Player',
+            getOAuthToken: cb => { cb(token); },
+            volume: 0.5
+        });
+
+        // Ready
+        player.addListener('ready', ({ device_id }) => {
+            console.log('Ready with Device ID', device_id);
+            // Transfer playback to this device
+            transferPlayback(device_id, token);
+        });
+
+        // Not Ready
+        player.addListener('not_ready', ({ device_id }) => {
+            console.log('Device ID has gone offline', device_id);
+        });
+
+        player.addListener('initialization_error', ({ message }) => {
+            console.error('Failed to initialize', message);
+        });
+
+        player.addListener('authentication_error', ({ message }) => {
+            console.error('Failed to authenticate', message);
+        });
+
+        player.addListener('account_error', ({ message }) => {
+            console.error('Failed to validate Spotify account', message);
+        });
+
+        // Player state changes
+        player.addListener('player_state_changed', state => {
+            if (!state) return;
+
+            updatePlayerUI(state);
+            updateProgressBar(state);
+        });
+
+        // Connect to the player!
+        player.connect();
+
+        // Control button event listeners
+        document.getElementById('playPauseBtn').addEventListener('click', () => {
+            player.togglePlay().then(() => {
+                console.log('Toggled playback');
+            });
+        });
+
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            player.nextTrack().then(() => {
+                console.log('Skipped to next track');
+            });
+        });
+
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            player.previousTrack().then(() => {
+                console.log('Skipped to previous track');
+            });
+        });
+
+        document.getElementById('volumeSlider').addEventListener('input', (e) => {
+            const volume = e.target.value / 100;
+            player.setVolume(volume).then(() => {
+                console.log('Volume set to', volume);
+            });
+        });
+
+        document.getElementById('progressBar').addEventListener('input', (e) => {
+            const progress = e.target.value;
+            // We'll implement seeking when we have the track duration
+            console.log('Seek to', progress + '%');
+        });
+    };
+
+    // Transfer playback to Web Playback SDK device
+    function transferPlayback(deviceId, token) {
+        fetch('https://api.spotify.com/v1/me/player', {
+            method: 'PUT',
+            headers: {
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                device_ids: [deviceId],
+                play: false
+            })
+        }).then(response => {
+            if (response.status === 202) {
+                console.log('Playback transferred to Web Playback SDK');
+            }
+        });
+    }
+
+    // Update player UI based on state
+    function updatePlayerUI(state) {
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const playPauseIcon = playPauseBtn.querySelector('i');
+
+        if (state.paused) {
+            playPauseIcon.className = 'fas fa-play';
+        } else {
+            playPauseIcon.className = 'fas fa-pause';
+        }
+    }
+
+    // Update progress bar in real-time
+    function updateProgressBar(state) {
+        if (!state) return;
+
+        const progressBar = document.getElementById('progressBar');
+        const currentTimeEl = document.getElementById('currentTime');
+        const totalTimeEl = document.getElementById('totalTime');
+
+        const currentTime = state.position;
+        const duration = state.duration;
+
+        const progress = (currentTime / duration) * 100;
+        progressBar.value = progress;
+
+        // Format time (mm:ss)
+        currentTimeEl.textContent = formatTime(currentTime);
+        totalTimeEl.textContent = formatTime(duration);
+    }
+
+    // Format milliseconds to mm:ss
+    function formatTime(ms) {
+        const minutes = Math.floor(ms / 60000);
+        const seconds = Math.floor((ms % 60000) / 1000);
+        return minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+    }
+
+    // Fallback if SDK takes time to load
+    setTimeout(() => {
+        if (!window.Spotify) {
+            console.error('Spotify Web Playback SDK failed to load');
+        }
+    }, 5000);
+</script>
 </body>
 </html>
