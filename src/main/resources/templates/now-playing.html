@@ -162,6 +162,25 @@
 </div>
 <script>
     let player; // Add this global variable at the top
+    let progressInterval;
+
+    function startProgressUpdates() {
+        if (progressInterval) clearInterval(progressInterval);
+        progressInterval = setInterval(() => {
+            player.getCurrentState().then(state => {
+                if (state) {
+                    updateProgressBar(state);
+                }
+            });
+        }, 500);
+    }
+
+    function stopProgressUpdates() {
+        if (progressInterval) {
+            clearInterval(progressInterval);
+            progressInterval = null;
+        }
+    }
 
     // Spotify Web Playback SDK setup
     window.onSpotifyWebPlaybackSDKReady = () => {
@@ -178,6 +197,15 @@
             console.log('Ready with Device ID', device_id);
             // Transfer playback to this device
             transferPlayback(device_id, token);
+
+            // Start checking for progress updates
+            setTimeout(() => {
+                player.getCurrentState().then(state => {
+                    if (state && !state.paused) {
+                        startProgressUpdates();
+                    }
+                });
+            }, 1000);
         });
 
         // Not Ready
@@ -199,10 +227,20 @@
 
         // Player state changes
         player.addListener('player_state_changed', state => {
-            if (!state) return;
+            if (!state) {
+                stopProgressUpdates();
+                return;
+            }
 
             updatePlayerUI(state);
             updateProgressBar(state);
+
+            // Start continuous updates if playing, stop if paused
+            if (!state.paused) {
+                startProgressUpdates();
+            } else {
+                stopProgressUpdates();
+            }
         });
 
         // Connect to the player!
