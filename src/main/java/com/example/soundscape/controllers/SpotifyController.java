@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.Map;
 import java.util.Optional;
 
 @Controller
@@ -22,6 +23,36 @@ public class SpotifyController {
     public SpotifyController(UserRepository userRepository, SpotifyService spotifyService) {
         this.userRepository = userRepository;
         this.spotifyService = spotifyService;
+    }
+
+    // Simple now-playing page
+    @GetMapping("/now-playing")
+    public String nowPlaying(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+        if (userDetails == null) {
+            return "redirect:/login";
+        }
+
+        Optional<User> userOpt = userRepository.findByUsername(userDetails.getUsername());
+
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            boolean hasSpotifyToken = user.isSpotifyConnected();
+            model.addAttribute("connected", hasSpotifyToken);
+
+            if (hasSpotifyToken) {
+                // Get parsed Spotify profile
+                Map<String, String> spotifyProfile = spotifyService.getUserProfile(user.getSpotifyAccessToken());
+                model.addAttribute("spotifyProfile", spotifyProfile);
+
+                // Get parsed currently playing track
+                Map<String, String> currentlyPlaying = spotifyService.getCurrentlyPlaying(user.getSpotifyAccessToken());
+                model.addAttribute("trackInfo", currentlyPlaying);
+            }
+        } else {
+            model.addAttribute("connected", false);
+        }
+
+        return "now-playing";
     }
 
     // Page to connect Spotify account
@@ -36,32 +67,6 @@ public class SpotifyController {
         // Spring Security will automatically handle the OAuth2 redirect
         return "redirect:/oauth2/authorization/spotify";
     }
-
-    // Handle Spotify connection success
-    /*
-    @GetMapping("/spotify-success")
-    public String handleSpotifySuccess(
-            @AuthenticationPrincipal UserDetails userDetails,
-            Model model) {
-
-        Optional<User> userOpt = userRepository.findByUsername(userDetails.getUsername());
-        if (userOpt.isPresent()) {
-            User user = userOpt.get();
-
-            // Check if user has Spotify connected (we'll add this field to User)
-            if (user.getSpotifyAccessToken() != null) {
-                // Get user's top artists from Spotify
-                String topArtists = spotifyService.getUserTopArtists(user.getSpotifyAccessToken());
-                model.addAttribute("connected", true);
-                model.addAttribute("topArtists", topArtists);
-            } else {
-                model.addAttribute("connected", false);
-            }
-        }
-
-        return "spotify-success";
-    }
-     */
 
     // Find music matches with other users
     @GetMapping("/music-matches")

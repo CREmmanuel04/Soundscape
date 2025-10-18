@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Now Playing - Soundscape</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #121212;
+            color: white;
+            margin: 0;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: #1E1E1E;
+            border-radius: 15px;
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .track-info {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: #333;
+            border-radius: 10px;
+            font-size: 1.2rem;
+        }
+
+        .connection-status {
+            padding: 1rem;
+            background: #2a2a2a;
+            border-radius: 10px;
+            margin: 1rem 0;
+            border-left: 4px solid #1DB954;
+        }
+
+        .not-connected {
+            padding: 2rem;
+            background: #2a2a2a;
+            border-radius: 10px;
+            margin: 2rem 0;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1><i class="fab fa-spotify" style="color: #1DB954;"></i> Soundscape</h1>
+    <h2>Now Playing</h2>
+
+    <div th:if="${connected}">
+        <!-- Connection Status Box -->
+        <div class="connection-status">
+            <p><i class="fas fa-check-circle" style="color: #1DB954;"></i> Connected to Spotify as
+                <span th:text="${spotifyProfile.displayName}">User</span>
+            </p>
+        </div>
+
+        <div class="track-info" th:if="${trackInfo.isPlaying == 'true'}" style="display: flex; align-items: center; gap: 1.5rem; text-align: left;">
+            <img th:src="${trackInfo.albumImage}" style="width: 120px; height: 120px; border-radius: 8px; flex-shrink: 0;">
+            <div>
+                <p style="margin: 0 0 0.5rem 0;">You are currently listening to:</p>
+                <h3 style="margin: 0 0 0.3rem 0;" th:text="${trackInfo.trackName}">Track Name</h3>
+                <p style="color: #b3b3b3; margin: 0 0 0.2rem 0;" th:text="${'by ' + trackInfo.artistName}">Artist Name</p>
+                <p style="color: #888; font-size: 0.9rem; margin: 0;" th:text="${'from ' + trackInfo.albumName}">Album Name</p>
+            </div>
+        </div>
+
+        <div class="track-info" th:if="${trackInfo.isPlaying == 'false'}">
+            <p>You are currently listening to:</p>
+            <h3 style="color: #b3b3b3; font-style: italic;" th:text="${trackInfo.trackName}">No track playing</h3>
+        </div>
+    </div>
+
+    <div th:unless="${connected}" class="not-connected">
+        <p>Spotify not connected</p>
+        <p style="color: #b3b3b3; font-size: 0.9rem;">
+            You're logged in but haven't connected Spotify yet.
+        </p>
+    </div>
+
+    <div style="margin-top: 2rem;">
+        <a href="/posts" style="color: #1DB954;">← Back to Feed</a>
+    </div>
+</div>
+</body>
+</html>

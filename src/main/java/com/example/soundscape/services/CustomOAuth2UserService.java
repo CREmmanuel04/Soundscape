@@ -34,14 +34,17 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             String displayName = (String) attributes.get("display_name");
             String email = (String) attributes.get("email");
 
+            // GET THE ACCESS TOKEN FROM THE USER REQUEST
+            String accessToken = userRequest.getAccessToken().getTokenValue();
             System.out.println("=== OAUTH2 USER DATA RECEIVED ===");
             System.out.println("Spotify User ID: " + spotifyUserId);
             System.out.println("Display Name: " + displayName);
             System.out.println("Email: " + email);
+            System.out.println("Access Token: " + (accessToken != null ? "PRESENT" : "MISSING"));
             System.out.println("All attributes: " + attributes.keySet());
 
-            // Find or create user based on Spotify data
-            User user = findOrCreateUserFromOAuth(spotifyUserId, displayName, email);
+            // Find or create user based on Spotify data - PASS THE ACCESS TOKEN
+            User user = findOrCreateUserFromOAuth(spotifyUserId, displayName, email, accessToken);
 
             System.out.println("=== USER PROCESSING COMPLETE ===");
             System.out.println("Final user: " + user.getUsername() + " (ID: " + user.getId() + ")");
@@ -56,7 +59,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         }
     }
 
-    private User findOrCreateUserFromOAuth(String spotifyUserId, String displayName, String email) {
+    private User findOrCreateUserFromOAuth(String spotifyUserId, String displayName, String email, String accessToken) {
         System.out.println("=== FINDING OR CREATING USER ===");
 
         // First, try to find user by Spotify ID (already linked)
@@ -65,7 +68,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         if (user != null) {
             System.out.println("Found existing user by Spotify ID: " + user.getUsername());
-            return user;
+            // UPDATE ACCESS TOKEN FOR EXISTING USER
+            user.setSpotifyAccessToken(accessToken);
+            user.setSpotifyConnectedAt(Instant.now());
+            User savedUser = userService.save(user);
+            System.out.println("Updated access token for existing user: " + savedUser.getUsername());
+            return savedUser;
         }
 
         // If not found by Spotify ID, try to find by email
@@ -74,9 +82,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             System.out.println("Search by email '" + email + "': " + (user != null ? "FOUND" : "NOT FOUND"));
             if (user != null) {
                 System.out.println("Found existing user by email, linking Spotify: " + user.getUsername());
-                // Link Spotify to existing user
+                // Link Spotify to existing user WITH ACCESS TOKEN
                 user.setSpotifyUserId(spotifyUserId);
                 user.setSpotifyDisplayName(displayName);
+                user.setSpotifyAccessToken(accessToken); // SET THE ACCESS TOKEN
                 user.setSpotifyConnectedAt(Instant.now());
                 User savedUser = userService.save(user);
                 System.out.println("Linked Spotify to existing user: " + savedUser.getUsername());
@@ -96,6 +105,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             User newUser = new User(username, email, "OAUTH_USER_NO_PASSWORD");
             newUser.setSpotifyUserId(spotifyUserId);
             newUser.setSpotifyDisplayName(displayName);
+            newUser.setSpotifyAccessToken(accessToken); // SET THE ACCESS TOKEN
             newUser.setSpotifyConnectedAt(Instant.now());
 
             System.out.println("About to save new user: " + newUser.getUsername());
