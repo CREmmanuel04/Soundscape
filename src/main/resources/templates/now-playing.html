@@ -161,11 +161,13 @@
     </div>
 </div>
 <script>
+    let player; // Add this global variable at the top
+
     // Spotify Web Playback SDK setup
     window.onSpotifyWebPlaybackSDKReady = () => {
         const token = '[[${user.spotifyAccessToken}]]'; // We'll need to pass the token from backend
 
-        const player = new Spotify.Player({
+        player = new Spotify.Player({ // Remove 'const' to use the global variable
             name: 'Soundscape Player',
             getOAuthToken: cb => { cb(token); },
             volume: 0.5
@@ -234,8 +236,22 @@
 
         document.getElementById('progressBar').addEventListener('input', (e) => {
             const progress = e.target.value;
-            // We'll implement seeking when we have the track duration
-            console.log('Seek to', progress + '%');
+
+            // Get the current track duration to calculate seek position
+            player.getCurrentState().then(state => {
+                if (!state) {
+                    console.error('No player state available');
+                    return;
+                }
+
+                const duration = state.duration;
+                const seekPosition = (progress / 100) * duration;
+
+                // Seek to the calculated position
+                player.seek(seekPosition).then(() => {
+                    console.log('Seeked to', formatTime(seekPosition));
+                });
+            });
         });
     };
 
