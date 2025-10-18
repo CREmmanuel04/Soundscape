@@ -22,10 +22,10 @@ public class User {
     private Instant createdAt;
 
     // NEW: Spotify integration fields
-    @Column(name = "spotify_access_token")
+    @Column(name = "spotify_access_token", length = 2000)
     private String spotifyAccessToken;
 
-    @Column(name = "spotify_refresh_token")
+    @Column(name = "spotify_refresh_token", length = 2000)
     private String spotifyRefreshToken;
 
     @Column(name = "spotify_user_id")

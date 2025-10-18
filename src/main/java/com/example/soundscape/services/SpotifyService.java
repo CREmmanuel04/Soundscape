@@ -2,6 +2,8 @@ package com.example.soundscape.services;
 
 import com.example.soundscape.models.User;
 import com.example.soundscape.repositories.UserRepository;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -17,6 +19,39 @@ public class SpotifyService {
     public SpotifyService(UserRepository userRepository) {
         this.userRepository = userRepository;
         this.restTemplate = new RestTemplate();
+    }
+
+    // Get Spotify user profile to verify connection
+    public Map<String, String> getUserProfile(String accessToken) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(accessToken);
+
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+
+            String url = "https://api.spotify.com/v1/me";
+
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url, HttpMethod.GET, entity, String.class);
+
+            if (response.getStatusCode() == HttpStatus.OK) {
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode root = mapper.readTree(response.getBody());
+
+                Map<String, String> profile = new HashMap<>();
+                profile.put("displayName", root.get("display_name").asText());
+                profile.put("email", root.has("email") ? root.get("email").asText() : "");
+                profile.put("profileImage", root.get("images").get(0).get("url").asText());
+
+                return profile;
+            }
+        } catch (Exception e) {
+            System.out.println("Error fetching user profile: " + e.getMessage());
+        }
+
+        Map<String, String> fallback = new HashMap<>();
+        fallback.put("displayName", "Unknown");
+        return fallback;
     }
 
     // Get user's top artists from Spotify API
@@ -81,7 +116,7 @@ public class SpotifyService {
     }
 
     // Get currently playing track
-    public String getCurrentlyPlaying(String accessToken) {
+    public Map<String, String> getCurrentlyPlaying(String accessToken) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setBearerAuth(accessToken);
@@ -94,11 +129,32 @@ public class SpotifyService {
                     url, HttpMethod.GET, entity, String.class);
 
             if (response.getStatusCode() == HttpStatus.OK) {
-                return response.getBody();
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode root = mapper.readTree(response.getBody());
+
+                Map<String, String> trackInfo = new HashMap<>();
+
+                if (root.has("is_playing") && root.get("is_playing").asBoolean()) {
+                    JsonNode item = root.get("item");
+                    trackInfo.put("trackName", item.get("name").asText());
+                    trackInfo.put("artistName", item.get("artists").get(0).get("name").asText());
+                    trackInfo.put("albumName", item.get("album").get("name").asText());
+                    trackInfo.put("albumImage", item.get("album").get("images").get(0).get("url").asText());
+                    trackInfo.put("isPlaying", "true");
+                } else {
+                    trackInfo.put("isPlaying", "false");
+                    trackInfo.put("trackName", "No track currently playing");
+                }
+
+                return trackInfo;
             }
         } catch (Exception e) {
             System.out.println("Error getting currently playing: " + e.getMessage());
         }
-        return "No track currently playing";
+
+        Map<String, String> fallback = new HashMap<>();
+        fallback.put("isPlaying", "false");
+        fallback.put("trackName", "Unable to fetch track info");
+        return fallback;
     }
 }
