@@ -4,67 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Feed - Soundscape</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Include the common styles -->
+    <div th:replace="fragments :: common-styles"></div>
 
     <style>
-        :root {
-            --background-color: #121212;
-            --surface-color: #1E1E1E;
-            --primary-text-color: #FFFFFF;
-            --secondary-text-color: #b3b3b3;
-            --accent-color: #1DB954;
-            --input-background: #333333;
-            --border-color: #2a2a2a;
-            --like-color: #e74c3c;
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: var(--background-color);
-            color: var(--primary-text-color);
-            margin: 0;
-            padding: 0;
-        }
-
-        .header {
-            background-color: var(--surface-color);
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border-color);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .header-logo a {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary-text-color);
-            text-decoration: none;
-        }
-
-        .header-logo i {
-            color: var(--accent-color);
-        }
-
-        .nav-links a {
-            color: var(--secondary-text-color);
-            text-decoration: none;
-            margin-left: 1.5rem;
-            font-size: 1rem;
-            font-weight: 600;
-            transition: color 0.2s ease;
-        }
-
-        .nav-links a:hover {
-            color: var(--accent-color);
-        }
-
         .container {
             width: 100%;
             max-width: 700px;
@@ -123,7 +67,7 @@
             background-color: var(--surface-color);
             border-radius: 15px;
             margin-bottom: 1.5rem;
-            padding: 1.5rem 1.5rem 0.75rem 1.5rem; /* top, right, bottom, left */
+            padding: 0.75rem 1.5rem 0.75rem 1.5rem; /* top, right, bottom, left */
         }
 
         .post-header {
@@ -185,13 +129,15 @@
             background-color: rgba(231, 76, 60, 0.1);
         }
 
-        .like-btn.liked {
-            color: var(--like-color);
-        }
+        /* Might look better with the website theme as white and not red for likes */
 
-        .like-btn.liked i {
-            color: var(--like-color);
-        }
+        /*.like-btn.liked {*/
+        /*    color: var(--like-color);*/
+        /*}*/
+
+        /*.like-btn.liked i {*/
+        /*    color: var(--like-color);*/
+        /*}*/
 
         .like-btn i {
             font-size: 1.1rem;
@@ -264,15 +210,8 @@
 </head>
 <body>
 
-<header class="header">
-    <div class="header-logo">
-        <a href="/posts"><i class="fas fa-headphones-alt"></i> Soundscape</a>
-    </div>
-    <nav class="nav-links">
-        <a href="/messages"><i class="fas fa-envelope"></i> Messages</a>
-        <a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
-    </nav>
-</header>
+<!-- Include the common nav header -->
+<div th:replace="fragments :: header"></div>
 
 <div class="container">
     <!-- SEARCH BAR -->

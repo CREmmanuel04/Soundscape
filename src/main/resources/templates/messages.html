@@ -3,33 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <title>Messages - Soundscape</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Include the common styles -->
+    <div th:replace="fragments :: common-styles"></div>
 
     <style>
-        :root {
-            --background-color: #121212;
-            --surface-color: #1E1E1E;
-            --primary-text-color: #FFFFFF;
-            --secondary-text-color: #b3b3b3;
-            --accent-color: #1DB954;
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: var(--background-color);
-            color: var(--primary-text-color);
-            margin: 0;
-            padding: 2rem;
-            display: flex;
-            justify-content: center;
-        }
-
         .main-container {
             width: 100%;
             max-width: 600px;
+            margin: 2rem auto;
         }
 
         h1 {
@@ -76,8 +58,12 @@
     </style>
 </head>
 <body>
+
+<!-- Include nav header from fragments -->
+<div th:replace="fragments :: header"></div>
+
 <div class="main-container">
-    <h1><i class="fas fa-headphones-alt"></i> Soundscape Messages</h1>
+    <h1><i class="fas fa-envelope"></i> Messages</h1>
 
     <div th:if="${users.isEmpty()}">
         <p style="text-align: center; color: var(--secondary-text-color);">No other users to message.</p>
