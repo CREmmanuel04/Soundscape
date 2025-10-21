@@ -71,23 +71,6 @@ public class SpotifyController {
         return "redirect:/oauth2/authorization/spotify";
     }
 
-    // Find music matches with other users
-    @GetMapping("/music-matches")
-    public String findMusicMatches(
-            @AuthenticationPrincipal UserDetails userDetails,
-            Model model) {
-
-        Optional<User> currentUserOpt = userRepository.findByUsername(userDetails.getUsername());
-        if (currentUserOpt.isPresent()) {
-            User currentUser = currentUserOpt.get();
-            // This will find users with similar music taste
-            var matches = spotifyService.findMusicMatches(currentUser);
-            model.addAttribute("matches", matches);
-        }
-
-        return "music-matches";
-    }
-
     // Control Spotify playback
     @PostMapping("/spotify/play")
     public String playMusic(@AuthenticationPrincipal UserDetails userDetails) {

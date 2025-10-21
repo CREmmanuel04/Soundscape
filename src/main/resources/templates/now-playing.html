@@ -4,17 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Now Playing - Soundscape</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://sdk.scdn.co/spotify-player.js"></script>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background: #121212;
-            color: white;
-            margin: 0;
-            padding: 2rem;
-        }
 
+    <!-- Include common styles and fonts from fragments -->
+    <div th:replace="fragments :: common-styles"></div>
+
+    <!-- Page-specific styles -->
+    <style>
         .container {
             max-width: 600px;
             margin: 0 auto;
@@ -80,8 +75,15 @@
             background: #1ed760;
         }
     </style>
+
+    <!-- Spotify Web Playback SDK -->
+    <script src="https://sdk.scdn.co/spotify-player.js"></script>
 </head>
 <body>
+
+<!-- Include nav header from fragments -->
+<div th:replace="fragments :: header"></div>
+
 <div class="container">
     <h1><i class="fab fa-spotify" style="color: #1DB954;"></i> Soundscape</h1>
     <h2>Now Playing</h2>
