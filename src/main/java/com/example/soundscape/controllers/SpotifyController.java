@@ -4,14 +4,16 @@ import com.example.soundscape.models.User;
 import com.example.soundscape.repositories.UserRepository;
 import com.example.soundscape.services.SpotifyService;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -145,5 +147,78 @@ public class SpotifyController {
             spotifyService.startPlayback(userOpt.get().getSpotifyAccessToken());
         }
         return "redirect:/spotify-success";
+    }
+
+    // Search for tracks on Spotify (AJAX endpoint)
+    @GetMapping("/api/spotify/search")
+    @ResponseBody
+    public ResponseEntity<List<Map<String, String>>> searchTracks(
+            @RequestParam String query,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        
+        if (userDetails == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        Optional<User> userOpt = userRepository.findByUsername(userDetails.getUsername());
+        if (userOpt.isPresent() && userOpt.get().isSpotifyConnected()) {
+            User user = userOpt.get();
+            List<Map<String, String>> tracks = spotifyService.searchTracks(user.getSpotifyAccessToken(), query);
+            return ResponseEntity.ok(tracks);
+        }
+
+        return ResponseEntity.status(403).build(); // User not connected to Spotify
+    }
+
+    // Get track details by ID (AJAX endpoint)
+    @GetMapping("/api/spotify/track")
+    @ResponseBody
+    public ResponseEntity<Map<String, String>> getTrack(
+            @RequestParam String id,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        
+        if (userDetails == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        Optional<User> userOpt = userRepository.findByUsername(userDetails.getUsername());
+        if (userOpt.isPresent() && userOpt.get().isSpotifyConnected()) {
+            User user = userOpt.get();
+            Map<String, String> track = spotifyService.getTrackById(user.getSpotifyAccessToken(), id);
+            return ResponseEntity.ok(track);
+        }
+
+        return ResponseEntity.status(403).build();
+    }
+
+    // Play a specific track (AJAX endpoint)
+    @PostMapping("/api/spotify/play/{trackId}")
+    @ResponseBody
+    public ResponseEntity<Map<String, String>> playTrack(
+            @PathVariable String trackId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        
+        if (userDetails == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        Optional<User> userOpt = userRepository.findByUsername(userDetails.getUsername());
+        if (userOpt.isPresent() && userOpt.get().isSpotifyConnected()) {
+            User user = userOpt.get();
+            try {
+                spotifyService.playTrack(user.getSpotifyAccessToken(), trackId);
+                Map<String, String> response = new HashMap<>();
+                response.put("status", "success");
+                response.put("message", "Track playback started");
+                return ResponseEntity.ok(response);
+            } catch (Exception e) {
+                Map<String, String> response = new HashMap<>();
+                response.put("status", "error");
+                response.put("message", "Failed to start playback: " + e.getMessage());
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            }
+        }
+
+        return ResponseEntity.status(403).build();
     }
 }

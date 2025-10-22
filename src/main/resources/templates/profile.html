@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://sdk.scdn.co/spotify-player.js"></script>
 
     <style>
         :root {
@@ -159,14 +160,91 @@
             gap: 1rem;
         }
 
+        .album-cover {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 2px solid var(--border-color);
+        }
+
+        .song-icon {
+            font-size: 2rem;
+            color: var(--accent-color);
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            background-color: var(--surface-color);
+            border: 2px solid var(--border-color);
+        }
+
+        .song-details {
+            flex: 1;
+        }
+
         .song-details h4 {
             margin: 0 0 0.5rem 0;
             font-size: 1.2rem;
         }
 
         .song-details p {
-            margin: 0;
+            margin: 0 0 0.5rem 0;
             color: var(--secondary-text-color);
+        }
+
+        .spotify-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #1DB954;
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .spotify-link:hover {
+            text-decoration: underline;
+        }
+
+        .play-button {
+            background: #1DB954;
+            border: none;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            margin-left: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .play-button:hover {
+            background: #1ed760;
+            transform: scale(1.1);
+        }
+
+        .play-button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .play-button.playing {
+            background: #ff6b35;
+        }
+
+        .song-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1rem;
         }
 
         .spotify-status {
@@ -226,10 +304,38 @@
             <div class="favorite-song" th:if="${user.favoriteSongName != null and !user.favoriteSongName.isEmpty()}">
                 <h3><i class="fas fa-heart"></i> Favorite Song</h3>
                 <div class="song-info">
-                    <i class="fas fa-music" style="font-size: 2rem; color: var(--accent-color);"></i>
+                    <!-- Show album cover if available, otherwise show music icon -->
+                    <img th:if="${user.favoriteSongImage != null and !user.favoriteSongImage.isEmpty()}" 
+                         th:src="${user.favoriteSongImage}" 
+                         alt="Album Cover" 
+                         class="album-cover" />
+                    <div th:if="${user.favoriteSongImage == null or user.favoriteSongImage.isEmpty()}" 
+                         class="song-icon">
+                        <i class="fas fa-music"></i>
+                    </div>
+                    
                     <div class="song-details">
                         <h4 th:text="${user.favoriteSongName}">Song Name</h4>
                         <p th:text="${user.favoriteSongArtist}">Artist Name</p>
+                        
+                        <div class="song-controls">
+                            <!-- Spotify link if available -->
+                            <a th:if="${user.favoriteSongUrl != null and !user.favoriteSongUrl.isEmpty()}" 
+                               th:href="${user.favoriteSongUrl}" 
+                               target="_blank" 
+                               class="spotify-link">
+                                <i class="fab fa-spotify"></i> Listen on Spotify
+                            </a>
+                            
+                            <!-- Play button for Spotify connected users -->
+                            <button th:if="${user.spotifyAccessToken != null and user.favoriteSongId != null}" 
+                                    class="play-button" 
+                                    id="playFavoriteBtn"
+                                    th:data-track-id="${user.favoriteSongId}"
+                                    title="Play on Spotify">
+                                <i class="fas fa-play"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -246,6 +352,241 @@
         </div>
     </div>
 </div>
+
+<script th:if="${user.spotifyAccessToken != null}">
+    let player;
+    let deviceId;
+    
+    // Spotify Web Playback SDK setup
+    window.onSpotifyWebPlaybackSDKReady = () => {
+        const token = /*[[${user.spotifyAccessToken}]]*/ '';
+        
+        if (!token) {
+            console.log('No Spotify access token available');
+            return;
+        }
+
+        player = new Spotify.Player({
+            name: 'Soundscape Profile Player',
+            getOAuthToken: cb => { cb(token); },
+            volume: 0.7
+        });
+
+        // Ready
+        player.addListener('ready', ({ device_id }) => {
+            console.log('Ready with Device ID', device_id);
+            deviceId = device_id;
+            
+            // Enable play button once player is ready
+            const playBtn = document.getElementById('playFavoriteBtn');
+            if (playBtn) {
+                playBtn.disabled = false;
+                playBtn.title = 'Play on Spotify';
+            }
+        });
+
+        // Not Ready
+        player.addListener('not_ready', ({ device_id }) => {
+            console.log('Device ID has gone offline', device_id);
+        });
+
+        // Error handling
+        player.addListener('initialization_error', ({ message }) => {
+            console.error('Failed to initialize Spotify player:', message);
+        });
+
+        player.addListener('authentication_error', ({ message }) => {
+            console.error('Failed to authenticate with Spotify:', message);
+        });
+
+        player.addListener('account_error', ({ message }) => {
+            console.error('Spotify account error:', message);
+        });
+
+        // Player state changes
+        player.addListener('player_state_changed', state => {
+            if (!state) return;
+            
+            const playBtn = document.getElementById('playFavoriteBtn');
+            if (playBtn) {
+                const icon = playBtn.querySelector('i');
+                if (state.paused) {
+                    icon.className = 'fas fa-play';
+                    playBtn.classList.remove('playing');
+                    playBtn.title = 'Play on Spotify';
+                } else {
+                    icon.className = 'fas fa-pause';
+                    playBtn.classList.add('playing');
+                    playBtn.title = 'Pause';
+                }
+            }
+        });
+
+        // Connect to the player
+        player.connect();
+    };
+
+    // Toggle play/pause if already playing
+    function togglePlayback() {
+        if (player) {
+            player.togglePlay().then(() => {
+                console.log('Toggled playback');
+            }).catch(error => {
+                console.error('Error toggling playback:', error);
+            });
+        }
+    }
+
+    // Set up event listener when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        const playBtn = document.getElementById('playFavoriteBtn');
+        console.log('Play button found:', playBtn ? 'yes' : 'no');
+        
+        if (playBtn) {
+            const trackId = playBtn.getAttribute('data-track-id');
+            console.log('Track ID:', trackId);
+            
+            playBtn.disabled = false; // Enable button immediately
+            playBtn.addEventListener('click', function(e) {
+                console.log('Play button clicked!');
+                e.preventDefault(); // Prevent any default behavior
+                
+                if (this.classList.contains('playing')) {
+                    togglePlayback();
+                } else {
+                    playFavoriteSong();
+                }
+            });
+            
+            console.log('Play button event listener added');
+        }
+    });
+
+    // Enhanced play function with fallback
+    function playFavoriteSong() {
+        const playBtn = document.getElementById('playFavoriteBtn');
+        if (!playBtn) return;
+        
+        const trackId = playBtn.getAttribute('data-track-id');
+        if (!trackId) {
+            alert('No track ID available');
+            return;
+        }
+        
+        // If Web Playback SDK is available and ready, use it
+        if (deviceId && player) {
+            playWithWebSDK(trackId);
+        } else {
+            // Fallback: Use Spotify Web API directly or open in Spotify
+            playWithFallback(trackId);
+        }
+    }
+
+    // Play using Web Playback SDK
+    function playWithWebSDK(trackId) {
+        const token = /*[[${user.spotifyAccessToken}]]*/ '';
+        
+        // First transfer playback to our device, then play the track
+        fetch('https://api.spotify.com/v1/me/player', {
+            method: 'PUT',
+            headers: {
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                device_ids: [deviceId],
+                play: true
+            })
+        }).then(response => {
+            if (response.status === 202 || response.status === 204) {
+                // Device transfer successful, now play the specific track
+                setTimeout(() => {
+                    fetch('https://api.spotify.com/v1/me/player/play?device_id=' + deviceId, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            uris: ['spotify:track:' + trackId]
+                        })
+                    }).then(playResponse => {
+                        if (playResponse.status === 202 || playResponse.status === 204) {
+                            console.log('Playing favorite song:', trackId);
+                            updateButtonState(true);
+                        } else {
+                            console.error('Failed to play track:', playResponse.status);
+                            playWithFallback(trackId);
+                        }
+                    }).catch(error => {
+                        console.error('Error playing track:', error);
+                        playWithFallback(trackId);
+                    });
+                }, 500);
+            } else {
+                console.error('Failed to transfer playback:', response.status);
+                playWithFallback(trackId);
+            }
+        }).catch(error => {
+            console.error('Error transferring playback:', error);
+            playWithFallback(trackId);
+        });
+    }
+
+    // Fallback: Use backend API or open Spotify
+    function playWithFallback(trackId) {
+        console.log('Using fallback playback method');
+        
+        // Try backend API first
+        fetch('/api/spotify/play/' + trackId, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                console.log('Playback started via backend API');
+                updateButtonState(true);
+            } else {
+                console.log('Backend API failed, opening Spotify URL');
+                // Final fallback: open Spotify URL
+                const spotifyUrl = 'https://open.spotify.com/track/' + trackId;
+                window.open(spotifyUrl, '_blank');
+            }
+        }).catch(error => {
+            console.error('Backend API error:', error);
+            // Final fallback: open Spotify URL
+            const spotifyUrl = 'https://open.spotify.com/track/' + trackId;
+            window.open(spotifyUrl, '_blank');
+        });
+    }
+
+    // Update button visual state
+    function updateButtonState(isPlaying) {
+        const playBtn = document.getElementById('playFavoriteBtn');
+        if (playBtn) {
+            const icon = playBtn.querySelector('i');
+            if (isPlaying) {
+                icon.className = 'fas fa-pause';
+                playBtn.classList.add('playing');
+                playBtn.title = 'Pause';
+            } else {
+                icon.className = 'fas fa-play';
+                playBtn.classList.remove('playing');
+                playBtn.title = 'Play on Spotify';
+            }
+        }
+    }
+
+    // Fallback if SDK takes time to load - but keep button clickable
+    setTimeout(() => {
+        if (!window.Spotify) {
+            console.log('Spotify Web Playback SDK not available, using fallback methods');
+            // Button remains clickable with fallback functionality
+        }
+    }, 5000); // Reduced timeout since button is always clickable now
+</script>
 
 </body>
 </html>

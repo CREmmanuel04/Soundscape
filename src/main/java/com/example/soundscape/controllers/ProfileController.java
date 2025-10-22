@@ -70,6 +70,8 @@ public class ProfileController {
                                @RequestParam(required = false) String favoriteSongId,
                                @RequestParam(required = false) String favoriteSongName,
                                @RequestParam(required = false) String favoriteSongArtist,
+                               @RequestParam(required = false) String favoriteSongImage,
+                               @RequestParam(required = false) String favoriteSongUrl,
                                Authentication authentication) {
         
         User user = userService.findByUsername(authentication.getName());
@@ -95,6 +97,8 @@ public class ProfileController {
                 user.setFavoriteSongId(favoriteSongId.trim());
                 user.setFavoriteSongName(favoriteSongName != null ? favoriteSongName.trim() : "");
                 user.setFavoriteSongArtist(favoriteSongArtist != null ? favoriteSongArtist.trim() : "");
+                user.setFavoriteSongImage(favoriteSongImage != null ? favoriteSongImage.trim() : "");
+                user.setFavoriteSongUrl(favoriteSongUrl != null ? favoriteSongUrl.trim() : "");
             }
             
             userService.save(user);

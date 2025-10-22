@@ -227,6 +227,99 @@
             text-align: right;
             margin-top: 0.5rem;
         }
+
+        /* Spotify Search Styles */
+        .spotify-search {
+            margin-top: 1rem;
+        }
+
+        .search-results {
+            margin-top: 1rem;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1rem;
+        }
+
+        .track-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .track-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background-color: var(--surface-color);
+        }
+
+        .track-item:hover {
+            border-color: var(--accent-color);
+            background-color: var(--input-background);
+        }
+
+        .track-item.selected {
+            border-color: var(--accent-color);
+            background-color: var(--input-background);
+        }
+
+        .track-image {
+            width: 50px;
+            height: 50px;
+            border-radius: 5px;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+
+        .track-info {
+            flex-grow: 1;
+        }
+
+        .track-name {
+            font-weight: 600;
+            color: var(--primary-text-color);
+        }
+
+        .track-artist {
+            color: var(--secondary-text-color);
+            font-size: 0.9rem;
+        }
+
+        .current-selection {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: var(--surface-color);
+            border-radius: 10px;
+            border: 2px solid var(--accent-color);
+        }
+
+        .selected-track {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .spotify-link {
+            color: #1DB954;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .spotify-link:hover {
+            text-decoration: underline;
+        }
+
+        .manual-entry {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
     </style>
 </head>
 <body>
@@ -295,22 +388,63 @@
             <div class="form-section">
                 <h3><i class="fas fa-heart"></i> Favorite Song</h3>
                 <div class="spotify-section">
-                    <div class="spotify-info">
-                        <p><i class="fab fa-spotify"></i> Connect your Spotify account to select your favorite song</p>
+                    <div class="spotify-info" th:if="${user.spotifyUserId == null}">
+                        <p><i class="fab fa-spotify"></i> <a href="/connect-spotify">Connect your Spotify account</a> to search and select your favorite song</p>
                     </div>
-                    <div class="form-group">
-                        <label for="favoriteSongName">Song Name:</label>
-                        <input type="text" name="favoriteSongName" id="favoriteSongName" 
-                               placeholder="Enter song name manually..." 
-                               th:value="${user.favoriteSongName}" />
+                    
+                    <!-- Spotify Search (only if connected) -->
+                    <div th:if="${user.spotifyUserId != null}" class="spotify-search">
+                        <div class="form-group">
+                            <label for="songSearch">Search Spotify:</label>
+                            <input type="text" id="songSearch" placeholder="Search for a song..." />
+                            <button type="button" id="searchBtn" class="btn btn-secondary">
+                                <i class="fas fa-search"></i> Search
+                            </button>
+                        </div>
+                        
+                        <!-- Search Results -->
+                        <div id="searchResults" class="search-results" style="display: none;">
+                            <h4>Search Results:</h4>
+                            <div id="trackList" class="track-list"></div>
+                        </div>
+                        
+                        <!-- Current Selection -->
+                        <div id="currentSelection" class="current-selection" th:if="${user.favoriteSongName != null}">
+                            <h4>Current Favorite Song:</h4>
+                            <div class="selected-track">
+                                <img th:if="${user.favoriteSongImage != null}" th:src="${user.favoriteSongImage}" alt="Album cover" class="track-image" />
+                                <div class="track-info">
+                                    <strong th:text="${user.favoriteSongName}">Song Name</strong><br/>
+                                    <span th:text="${user.favoriteSongArtist}">Artist</span>
+                                </div>
+                                <a th:if="${user.favoriteSongUrl != null}" th:href="${user.favoriteSongUrl}" target="_blank" class="spotify-link">
+                                    <i class="fab fa-spotify"></i> Open in Spotify
+                                </a>
+                            </div>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="favoriteSongArtist">Artist:</label>
-                        <input type="text" name="favoriteSongArtist" id="favoriteSongArtist" 
-                               placeholder="Enter artist name..." 
-                               th:value="${user.favoriteSongArtist}" />
+                    
+                    <!-- Manual Entry (fallback) -->
+                    <div class="manual-entry">
+                        <p><strong>Or enter manually:</strong></p>
+                        <div class="form-group">
+                            <label for="favoriteSongName">Song Name:</label>
+                            <input type="text" name="favoriteSongName" id="favoriteSongName" 
+                                   placeholder="Enter song name manually..." 
+                                   th:value="${user.favoriteSongName}" />
+                        </div>
+                        <div class="form-group">
+                            <label for="favoriteSongArtist">Artist:</label>
+                            <input type="text" name="favoriteSongArtist" id="favoriteSongArtist" 
+                                   placeholder="Enter artist name..." 
+                                   th:value="${user.favoriteSongArtist}" />
+                        </div>
                     </div>
-                    <input type="hidden" name="favoriteSongId" th:value="${user.favoriteSongId}" />
+                    
+                    <!-- Hidden fields for Spotify data -->
+                    <input type="hidden" name="favoriteSongId" id="favoriteSongId" th:value="${user.favoriteSongId}" />
+                    <input type="hidden" name="favoriteSongImage" id="favoriteSongImage" th:value="${user.favoriteSongImage}" />
+                    <input type="hidden" name="favoriteSongUrl" id="favoriteSongUrl" th:value="${user.favoriteSongUrl}" />
                 </div>
             </div>
 
@@ -360,9 +494,143 @@
         counter.textContent = textarea.value.length;
     }
 
-    // Initialize character count on page load
+    // Spotify Search Functionality
+    function searchSpotify() {
+        const query = document.getElementById('songSearch').value.trim();
+        if (!query) return;
+
+        const searchBtn = document.getElementById('searchBtn');
+        searchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
+        searchBtn.disabled = true;
+
+        fetch(`/api/spotify/search?query=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(tracks => {
+                displaySearchResults(tracks);
+                searchBtn.innerHTML = '<i class="fas fa-search"></i> Search';
+                searchBtn.disabled = false;
+            })
+            .catch(error => {
+                console.error('Search error:', error);
+                searchBtn.innerHTML = '<i class="fas fa-search"></i> Search';
+                searchBtn.disabled = false;
+                alert('Error searching for tracks. Please try again.');
+            });
+    }
+
+    function displaySearchResults(tracks) {
+        const resultsDiv = document.getElementById('searchResults');
+        const trackList = document.getElementById('trackList');
+        
+        if (tracks.length === 0) {
+            trackList.innerHTML = '<p>No tracks found. Try a different search term.</p>';
+        } else {
+            trackList.innerHTML = tracks.map(track => `
+                <div class="track-item" onclick="selectTrack('${track.id}', '${escapeHtml(track.name)}', '${escapeHtml(track.artist)}', '${escapeHtml(track.image)}', '${escapeHtml(track.spotifyUrl)}')">
+                    ${track.image ? `<img src="${track.image}" alt="Album cover" class="track-image" />` : '<div class="track-image" style="background: #333;"></div>'}
+                    <div class="track-info">
+                        <div class="track-name">${escapeHtml(track.name)}</div>
+                        <div class="track-artist">${escapeHtml(track.artist)}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        resultsDiv.style.display = 'block';
+    }
+
+    function selectTrack(id, name, artist, image, spotifyUrl) {
+        // Update hidden form fields
+        document.getElementById('favoriteSongId').value = id;
+        document.getElementById('favoriteSongImage').value = image;
+        document.getElementById('favoriteSongUrl').value = spotifyUrl;
+        
+        // Update visible form fields
+        document.getElementById('favoriteSongName').value = name;
+        document.getElementById('favoriteSongArtist').value = artist;
+        
+        // Update current selection display
+        updateCurrentSelection(name, artist, image, spotifyUrl);
+        
+        // Hide search results
+        document.getElementById('searchResults').style.display = 'none';
+        
+        // Clear search input
+        document.getElementById('songSearch').value = '';
+    }
+
+    function updateCurrentSelection(name, artist, image, spotifyUrl) {
+        const currentSelection = document.getElementById('currentSelection');
+        if (!currentSelection) {
+            // Create the current selection div if it doesn't exist
+            const spotifySection = document.querySelector('.spotify-search');
+            const selectionHtml = `
+                <div id="currentSelection" class="current-selection">
+                    <h4>Current Favorite Song:</h4>
+                    <div class="selected-track">
+                        ${image ? `<img src="${image}" alt="Album cover" class="track-image" />` : ''}
+                        <div class="track-info">
+                            <strong>${escapeHtml(name)}</strong><br/>
+                            <span>${escapeHtml(artist)}</span>
+                        </div>
+                        ${spotifyUrl ? `<a href="${spotifyUrl}" target="_blank" class="spotify-link"><i class="fab fa-spotify"></i> Open in Spotify</a>` : ''}
+                    </div>
+                </div>
+            `;
+            spotifySection.insertAdjacentHTML('beforeend', selectionHtml);
+        } else {
+            // Update existing selection
+            currentSelection.innerHTML = `
+                <h4>Current Favorite Song:</h4>
+                <div class="selected-track">
+                    ${image ? `<img src="${image}" alt="Album cover" class="track-image" />` : ''}
+                    <div class="track-info">
+                        <strong>${escapeHtml(name)}</strong><br/>
+                        <span>${escapeHtml(artist)}</span>
+                    </div>
+                    ${spotifyUrl ? `<a href="${spotifyUrl}" target="_blank" class="spotify-link"><i class="fab fa-spotify"></i> Open in Spotify</a>` : ''}
+                </div>
+            `;
+            currentSelection.style.display = 'block';
+        }
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Initialize character count and event listeners on page load
     document.addEventListener('DOMContentLoaded', function() {
         updateCharCount();
+        
+        // Add search button event listener
+        const searchBtn = document.getElementById('searchBtn');
+        if (searchBtn) {
+            searchBtn.addEventListener('click', searchSpotify);
+        }
+        
+        // Add enter key support for search
+        const searchInput = document.getElementById('songSearch');
+        if (searchInput) {
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    searchSpotify();
+                }
+            });
+        }
+
+        // Show existing favorite song if present
+        const favName = document.getElementById('favoriteSongName').value;
+        const favArtist = document.getElementById('favoriteSongArtist').value;
+        const favImage = document.getElementById('favoriteSongImage').value;
+        const favUrl = document.getElementById('favoriteSongUrl').value;
+        
+        if (favName && favArtist) {
+            updateCurrentSelection(favName, favArtist, favImage, favUrl);
+        }
     });
 </script>
 

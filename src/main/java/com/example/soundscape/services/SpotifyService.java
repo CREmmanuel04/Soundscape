@@ -115,6 +115,122 @@ public class SpotifyService {
         }
     }
 
+    // Play a specific track by ID
+    public void playTrack(String accessToken, String trackId) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(accessToken);
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            // Play specific track using Spotify track URI
+            String playBody = "{\"uris\":[\"spotify:track:" + trackId + "\"]}";
+
+            HttpEntity<String> entity = new HttpEntity<>(playBody, headers);
+
+            String url = "https://api.spotify.com/v1/me/player/play";
+
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.PUT, entity, String.class);
+            
+            if (response.getStatusCode().is2xxSuccessful()) {
+                System.out.println("Successfully started playing track: " + trackId);
+            } else {
+                System.out.println("Failed to play track. Status: " + response.getStatusCode());
+            }
+
+        } catch (Exception e) {
+            System.out.println("Error playing track " + trackId + ": " + e.getMessage());
+            throw new RuntimeException("Failed to play track: " + e.getMessage());
+        }
+    }
+
+    // Search for tracks on Spotify
+    public List<Map<String, String>> searchTracks(String accessToken, String query) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(accessToken);
+
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+
+            // URL encode the query
+            String encodedQuery = java.net.URLEncoder.encode(query, "UTF-8");
+            String url = "https://api.spotify.com/v1/search?q=" + encodedQuery + "&type=track&limit=10";
+
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url, HttpMethod.GET, entity, String.class);
+
+            if (response.getStatusCode() == HttpStatus.OK) {
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode root = mapper.readTree(response.getBody());
+                JsonNode tracks = root.get("tracks").get("items");
+
+                List<Map<String, String>> trackList = new ArrayList<>();
+                
+                for (JsonNode track : tracks) {
+                    Map<String, String> trackInfo = new HashMap<>();
+                    trackInfo.put("id", track.get("id").asText());
+                    trackInfo.put("name", track.get("name").asText());
+                    trackInfo.put("artist", track.get("artists").get(0).get("name").asText());
+                    trackInfo.put("album", track.get("album").get("name").asText());
+                    
+                    // Get album image if available
+                    if (track.get("album").has("images") && track.get("album").get("images").size() > 0) {
+                        trackInfo.put("image", track.get("album").get("images").get(0).get("url").asText());
+                    } else {
+                        trackInfo.put("image", "");
+                    }
+                    
+                    trackInfo.put("spotifyUrl", track.get("external_urls").get("spotify").asText());
+                    trackList.add(trackInfo);
+                }
+                
+                return trackList;
+            }
+        } catch (Exception e) {
+            System.out.println("Error searching tracks: " + e.getMessage());
+        }
+
+        return new ArrayList<>();
+    }
+
+    // Get track details by Spotify ID
+    public Map<String, String> getTrackById(String accessToken, String trackId) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(accessToken);
+
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+
+            String url = "https://api.spotify.com/v1/tracks/" + trackId;
+
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url, HttpMethod.GET, entity, String.class);
+
+            if (response.getStatusCode() == HttpStatus.OK) {
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode track = mapper.readTree(response.getBody());
+
+                Map<String, String> trackInfo = new HashMap<>();
+                trackInfo.put("id", track.get("id").asText());
+                trackInfo.put("name", track.get("name").asText());
+                trackInfo.put("artist", track.get("artists").get(0).get("name").asText());
+                trackInfo.put("album", track.get("album").get("name").asText());
+                
+                if (track.get("album").has("images") && track.get("album").get("images").size() > 0) {
+                    trackInfo.put("image", track.get("album").get("images").get(0).get("url").asText());
+                } else {
+                    trackInfo.put("image", "");
+                }
+                
+                trackInfo.put("spotifyUrl", track.get("external_urls").get("spotify").asText());
+                return trackInfo;
+            }
+        } catch (Exception e) {
+            System.out.println("Error getting track details: " + e.getMessage());
+        }
+
+        return new HashMap<>();
+    }
+
     // Get currently playing track
     public Map<String, String> getCurrentlyPlaying(String accessToken) {
         try {

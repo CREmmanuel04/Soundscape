@@ -59,6 +59,12 @@ public class User {
     @Column(name = "favorite_song_artist")
     private String favoriteSongArtist;
 
+    @Column(name = "favorite_song_image")
+    private String favoriteSongImage;
+
+    @Column(name = "favorite_song_url")
+    private String favoriteSongUrl;
+
     public User() {}
 
     // Constructor for registration (without Spotify)
@@ -121,6 +127,8 @@ public class User {
     public String getFavoriteSongId() { return favoriteSongId; }
     public String getFavoriteSongName() { return favoriteSongName; }
     public String getFavoriteSongArtist() { return favoriteSongArtist; }
+    public String getFavoriteSongImage() { return favoriteSongImage; }
+    public String getFavoriteSongUrl() { return favoriteSongUrl; }
 
     // NEW: Profile customization setters
     public void setProfileIcon(String profileIcon) { this.profileIcon = profileIcon; }
@@ -129,4 +137,6 @@ public class User {
     public void setFavoriteSongId(String favoriteSongId) { this.favoriteSongId = favoriteSongId; }
     public void setFavoriteSongName(String favoriteSongName) { this.favoriteSongName = favoriteSongName; }
     public void setFavoriteSongArtist(String favoriteSongArtist) { this.favoriteSongArtist = favoriteSongArtist; }
+    public void setFavoriteSongImage(String favoriteSongImage) { this.favoriteSongImage = favoriteSongImage; }
+    public void setFavoriteSongUrl(String favoriteSongUrl) { this.favoriteSongUrl = favoriteSongUrl; }
 }
