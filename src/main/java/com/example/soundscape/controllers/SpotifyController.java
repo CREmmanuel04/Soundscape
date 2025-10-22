@@ -3,6 +3,7 @@ package com.example.soundscape.controllers;
 import com.example.soundscape.models.User;
 import com.example.soundscape.repositories.UserRepository;
 import com.example.soundscape.services.SpotifyService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -101,6 +102,22 @@ public class SpotifyController {
         }
         
         return "redirect:/login";
+    }
+
+    // Add this method to your SpotifyController class
+    @GetMapping("/login/oauth2/code/spotify")
+    public String oauth2Callback(@RequestParam(required = false) String error,
+                                 @RequestParam(required = false) String code,
+                                 HttpServletRequest request) {
+        System.out.println("=== OAUTH2 CALLBACK ===");
+        System.out.println("Error: " + error);
+        System.out.println("Code: " + (code != null ? "PRESENT" : "MISSING"));
+        System.out.println("Request URL: " + request.getRequestURL());
+
+        // Also check all parameters
+        System.out.println("All parameters: " + request.getParameterMap());
+
+        return "redirect:/";
     }
 
     // Find music matches with other users
