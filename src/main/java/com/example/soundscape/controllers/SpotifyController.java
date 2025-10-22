@@ -70,6 +70,38 @@ public class SpotifyController {
         // Spring Security will automatically handle the OAuth2 redirect
         return "redirect:/oauth2/authorization/spotify";
     }
+    
+    // Direct link to Spotify OAuth (for testing)
+    @GetMapping("/auth/spotify")
+    public String authSpotify() {
+        return "redirect:/oauth2/authorization/spotify";
+    }
+    
+    // Test endpoint to simulate Spotify connection without OAuth (for development)
+    @GetMapping("/test-spotify-connection")
+    public String testSpotifyConnection(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+        if (userDetails == null) {
+            return "redirect:/login";
+        }
+
+        Optional<User> userOpt = userRepository.findByUsername(userDetails.getUsername());
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            
+            // Simulate a Spotify connection for testing
+            user.setSpotifyUserId("test_user_" + user.getId());
+            user.setSpotifyDisplayName("Test User");
+            user.setSpotifyConnectedAt(java.time.Instant.now());
+            
+            userRepository.save(user);
+            
+            model.addAttribute("connected", true);
+            model.addAttribute("message", "Test Spotify connection successful! (Development mode)");
+            return "spotify-success";
+        }
+        
+        return "redirect:/login";
+    }
 
     // Find music matches with other users
     @GetMapping("/music-matches")

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${user.username + ' - Profile'}">Profile - Soundscape</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        :root {
+            --background-color: #121212;
+            --surface-color: #1E1E1E;
+            --primary-text-color: #FFFFFF;
+            --secondary-text-color: #b3b3b3;
+            --accent-color: #1DB954;
+            --border-color: #2a2a2a;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--primary-text-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            background-color: var(--surface-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header-logo a {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-text-color);
+            text-decoration: none;
+        }
+
+        .header-logo i {
+            color: var(--accent-color);
+        }
+
+        .nav-links a {
+            color: var(--secondary-text-color);
+            text-decoration: none;
+            margin-left: 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: color 0.2s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-color);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .profile-banner {
+            background-color: var(--surface-color);
+            border-radius: 15px;
+            padding: 0;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .banner-color {
+            height: 200px;
+            background: linear-gradient(135deg, var(--accent-color), #1aa34a);
+            position: relative;
+        }
+
+        .profile-info {
+            padding: 2rem;
+            position: relative;
+            margin-top: -60px;
+        }
+
+        .profile-icon {
+            font-size: 4rem;
+            background-color: var(--surface-color);
+            border-radius: 50%;
+            width: 120px;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 4px solid var(--background-color);
+            margin-bottom: 1rem;
+        }
+
+        .profile-username {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-bio {
+            color: var(--secondary-text-color);
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .profile-actions {
+            margin-bottom: 1.5rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            text-decoration: none;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: var(--primary-text-color);
+        }
+
+        .btn-primary:hover {
+            background-color: #1aa34a;
+            transform: translateY(-2px);
+        }
+
+        .favorite-song {
+            background-color: var(--background-color);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .favorite-song h3 {
+            color: var(--accent-color);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .song-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .song-details h4 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.2rem;
+        }
+
+        .song-details p {
+            margin: 0;
+            color: var(--secondary-text-color);
+        }
+
+        .spotify-status {
+            background-color: var(--background-color);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+
+        .spotify-connected {
+            color: var(--accent-color);
+        }
+
+        .spotify-not-connected {
+            color: var(--secondary-text-color);
+        }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <div class="header-logo">
+        <a href="/"><i class="fas fa-headphones-alt"></i> Soundscape</a>
+    </div>
+    <nav class="nav-links">
+        <a href="/posts"><i class="fas fa-stream"></i> Feed</a>
+        <a href="/messages"><i class="fas fa-envelope"></i> Messages</a>
+        <a href="/profile"><i class="fas fa-user"></i> Profile</a>
+        <a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </nav>
+</header>
+
+<div class="container">
+    <div class="profile-banner">
+        <div class="banner-color" th:style="${user.bannerColor != null ? 'background: ' + user.bannerColor : 'background: linear-gradient(135deg, var(--accent-color), #1aa34a)'}"></div>
+        
+        <div class="profile-info">
+            <div class="profile-icon" th:text="${user.profileIcon != null ? user.profileIcon : '😀'}">😀</div>
+            
+            <h1 class="profile-username" th:text="${user.username}">Username</h1>
+            
+            <div class="profile-bio">
+                <p th:if="${user.bio != null and !user.bio.isEmpty()}" th:text="${user.bio}">User bio goes here...</p>
+                <p th:if="${user.bio == null or user.bio.isEmpty()}" style="color: var(--secondary-text-color); font-style: italic;">
+                    No bio set yet.
+                </p>
+            </div>
+            
+            <div class="profile-actions" th:if="${isOwnProfile}">
+                <a href="/profile/edit" class="btn btn-primary">
+                    <i class="fas fa-edit"></i> Edit Profile
+                </a>
+            </div>
+            
+            <!-- Favorite Song Section -->
+            <div class="favorite-song" th:if="${user.favoriteSongName != null and !user.favoriteSongName.isEmpty()}">
+                <h3><i class="fas fa-heart"></i> Favorite Song</h3>
+                <div class="song-info">
+                    <i class="fas fa-music" style="font-size: 2rem; color: var(--accent-color);"></i>
+                    <div class="song-details">
+                        <h4 th:text="${user.favoriteSongName}">Song Name</h4>
+                        <p th:text="${user.favoriteSongArtist}">Artist Name</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Spotify Connection Status -->
+            <div class="spotify-status">
+                <div th:if="${user.spotifyUserId != null}" class="spotify-connected">
+                    <i class="fab fa-spotify"></i> Spotify Connected
+                </div>
+                <div th:if="${user.spotifyUserId == null}" class="spotify-not-connected">
+                    <i class="fab fa-spotify"></i> Spotify Not Connected
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
