@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Music Analysis - Soundscape</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --background-color: #121212;
+            --surface-color: #1E1E1E;
+            --primary-text-color: #FFFFFF;
+            --secondary-text-color: #b3b3b3;
+            --accent-color: #1DB954;
+            --border-color: #2a2a2a;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--primary-text-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            background-color: var(--surface-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header-logo a {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-text-color);
+            text-decoration: none;
+        }
+
+        .header-logo i {
+            color: var(--accent-color);
+        }
+
+        .nav-links a {
+            color: var(--secondary-text-color);
+            text-decoration: none;
+            margin: 0 1rem;
+            transition: color 0.2s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-text-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-title {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-title h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, var(--accent-color), #1ed760);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .analysis-card {
+            background-color: var(--surface-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-title i {
+            color: var(--accent-color);
+        }
+
+        .genre-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .genre-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .genre-item:last-child {
+            border-bottom: none;
+        }
+
+        .genre-name {
+            font-weight: 500;
+            text-transform: capitalize;
+        }
+
+        .genre-count {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .artist-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .artist-card {
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 1rem;
+            transition: transform 0.2s ease;
+        }
+
+        .artist-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .artist-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 0.5rem;
+            object-fit: cover;
+        }
+
+        .artist-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .artist-popularity {
+            color: var(--secondary-text-color);
+            font-size: 0.8rem;
+        }
+
+        .track-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .track-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .track-item:last-child {
+            border-bottom: none;
+        }
+
+        .track-image {
+            width: 50px;
+            height: 50px;
+            border-radius: 4px;
+            object-fit: cover;
+        }
+
+        .track-info {
+            flex-grow: 1;
+        }
+
+        .track-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .track-artist {
+            color: var(--secondary-text-color);
+            font-size: 0.9rem;
+        }
+
+        .time-range-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .tab-button {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            color: var(--secondary-text-color);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-button.active {
+            background-color: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        .tab-button:hover {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .chart-container {
+            height: 300px;
+            margin-top: 1rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--secondary-text-color);
+        }
+
+        .error {
+            text-align: center;
+            padding: 2rem;
+            color: #ff6b6b;
+            background-color: rgba(255, 107, 107, 0.1);
+            border-radius: 8px;
+            margin: 2rem 0;
+        }
+
+        .spotify-not-connected {
+            text-align: center;
+            padding: 3rem;
+            background-color: var(--surface-color);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .connect-spotify-btn {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 1rem;
+            transition: background-color 0.2s ease;
+        }
+
+        .connect-spotify-btn:hover {
+            background-color: #1ed760;
+        }
+
+        .recently-played {
+            margin-top: 2rem;
+        }
+
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border-color), transparent);
+            margin: 3rem 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Navigation -->
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <div class="container">
+        <div class="page-title">
+            <h1><i class="fas fa-chart-line"></i> Your Music Analysis</h1>
+            <p>Discover your music taste patterns and listening habits</p>
+        </div>
+
+        <!-- Spotify Not Connected -->
+        <div th:if="${!connected}" class="spotify-not-connected">
+            <i class="fab fa-spotify" style="font-size: 3rem; color: var(--accent-color); margin-bottom: 1rem;"></i>
+            <h2>Connect Your Spotify Account</h2>
+            <p>To view your music analysis, you need to connect your Spotify account first.</p>
+            <a href="/connect-spotify" class="connect-spotify-btn">
+                <i class="fab fa-spotify"></i> Connect Spotify
+            </a>
+        </div>
+
+        <!-- Main Analysis Content -->
+        <div th:if="${connected}" id="analysisContent">
+            
+            <!-- Top Genres Analysis -->
+            <div class="analysis-grid">
+                <div class="analysis-card">
+                    <h3 class="card-title">
+                        <i class="fas fa-music"></i>
+                        Top Genres
+                    </h3>
+                    <ul class="genre-list" id="genreList">
+                        <li class="loading">Loading your top genres...</li>
+                    </ul>
+                    <div class="chart-container">
+                        <canvas id="genreChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Listening Statistics -->
+                <div class="analysis-card">
+                    <h3 class="card-title">
+                        <i class="fas fa-headphones"></i>
+                        Listening Stats
+                    </h3>
+                    <div id="listeningStats">
+                        <div class="loading">Analyzing your listening patterns...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Time Range Tabs -->
+            <div class="analysis-card">
+                <h3 class="card-title">
+                    <i class="fas fa-star"></i>
+                    Top Artists
+                </h3>
+                <div class="time-range-tabs">
+                    <button class="tab-button active" data-range="short">Last 4 Weeks</button>
+                    <button class="tab-button" data-range="medium">Last 6 Months</button>
+                    <button class="tab-button" data-range="long">All Time</button>
+                </div>
+                <div class="artist-grid" id="artistGrid">
+                    <div class="loading">Loading your top artists...</div>
+                </div>
+            </div>
+
+            <!-- Top Tracks -->
+            <div class="analysis-card">
+                <h3 class="card-title">
+                    <i class="fas fa-play"></i>
+                    Top Tracks
+                </h3>
+                <div class="time-range-tabs">
+                    <button class="tab-button active" data-range="short" data-type="tracks">Last 4 Weeks</button>
+                    <button class="tab-button" data-range="medium" data-type="tracks">Last 6 Months</button>
+                    <button class="tab-button" data-range="long" data-type="tracks">All Time</button>
+                </div>
+                <ul class="track-list" id="trackList">
+                    <li class="loading">Loading your top tracks...</li>
+                </ul>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <!-- Recently Played -->
+            <div class="analysis-card recently-played">
+                <h3 class="card-title">
+                    <i class="fas fa-clock"></i>
+                    Recently Played
+                </h3>
+                <ul class="track-list" id="recentlyPlayedList">
+                    <li class="loading">Loading recently played tracks...</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script th:if="${connected}">
+        let musicAnalysisData = {};
+        let recentlyPlayedData = {};
+        let genreChart = null;
+
+        // Load music analysis data
+        async function loadMusicAnalysis() {
+            try {
+                const response = await fetch('/api/music-analysis');
+                musicAnalysisData = await response.json();
+                
+                if (musicAnalysisData.error) {
+                    showError('Failed to load music analysis: ' + musicAnalysisData.error);
+                    return;
+                }
+                
+                displayGenres();
+                displayArtists('short');
+                displayTracks('short');
+                displayListeningStats();
+                
+                console.log('Music Analysis Data:', musicAnalysisData);
+            } catch (error) {
+                showError('Failed to load music analysis: ' + error.message);
+            }
+        }
+
+        // Load recently played tracks
+        async function loadRecentlyPlayed() {
+            try {
+                const response = await fetch('/api/recently-played');
+                recentlyPlayedData = await response.json();
+                
+                if (recentlyPlayedData.error) {
+                    console.error('Failed to load recently played:', recentlyPlayedData.error);
+                    return;
+                }
+                
+                displayRecentlyPlayed();
+            } catch (error) {
+                console.error('Failed to load recently played:', error.message);
+            }
+        }
+
+        // Display top genres
+        function displayGenres() {
+            const genreList = document.getElementById('genreList');
+            const topGenres = musicAnalysisData.top_genres || [];
+            
+            console.log('Top genres data:', topGenres);
+            
+            if (!Array.isArray(topGenres) || topGenres.length === 0) {
+                genreList.innerHTML = '<li class="genre-item">No genre data available</li>';
+                return;
+            }
+            
+            // Handle both array of arrays and array of objects
+            const processedGenres = topGenres.map(item => {
+                if (Array.isArray(item)) {
+                    return [item[0], item[1]]; // [genre, count]
+                } else if (typeof item === 'object' && item.key && item.value) {
+                    return [item.key, item.value]; // {key: genre, value: count}
+                } else {
+                    console.warn('Unexpected genre item format:', item);
+                    return [String(item), 1];
+                }
+            });
+            
+            genreList.innerHTML = processedGenres.map(([genre, count]) => `
+                <li class="genre-item">
+                    <span class="genre-name">${genre}</span>
+                    <span class="genre-count">${count}</span>
+                </li>
+            `).join('');
+            
+            // Create genre chart
+            createGenreChart(processedGenres.slice(0, 8));
+        }
+
+        // Create genre pie chart
+        function createGenreChart(genres) {
+            const ctx = document.getElementById('genreChart').getContext('2d');
+            
+            if (genreChart) {
+                genreChart.destroy();
+            }
+            
+            if (!Array.isArray(genres) || genres.length === 0) {
+                console.log('No genre data for chart');
+                return;
+            }
+            
+            const colors = [
+                '#1DB954', '#1ed760', '#1fdf64', '#20e268', '#21e56c',
+                '#22e870', '#23eb74', '#24ee78', '#25f17c', '#26f480'
+            ];
+            
+            try {
+                genreChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: genres.map(([genre]) => genre),
+                        datasets: [{
+                            data: genres.map(([, count]) => count),
+                            backgroundColor: colors,
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error creating genre chart:', error);
+            }
+        }
+
+        // Display artists for selected time range
+        function displayArtists(timeRange) {
+            const artistGrid = document.getElementById('artistGrid');
+            const artists = musicAnalysisData[`${timeRange}_term_artists`] || [];
+            
+            console.log(`Artists for ${timeRange}:`, artists);
+            
+            if (!Array.isArray(artists) || artists.length === 0) {
+                artistGrid.innerHTML = '<div class="loading">No artist data available for this time range</div>';
+                return;
+            }
+            
+            try {
+                artistGrid.innerHTML = artists.slice(0, 12).map(artist => `
+                    <div class="artist-card">
+                        <img src="${artist.image_url || '/images/default-artist.png'}" 
+                             alt="${artist.name || 'Unknown Artist'}" 
+                             class="artist-image"
+                             onerror="this.src='/images/default-artist.png'">
+                        <div class="artist-name">${artist.name || 'Unknown Artist'}</div>
+                        <div class="artist-popularity">Popularity: ${artist.popularity || 0}%</div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error displaying artists:', error);
+                artistGrid.innerHTML = '<div class="error">Error displaying artists</div>';
+            }
+        }
+
+        // Display tracks for selected time range
+        function displayTracks(timeRange) {
+            const trackList = document.getElementById('trackList');
+            const tracks = musicAnalysisData[`${timeRange}_term_tracks`] || [];
+            
+            console.log(`Tracks for ${timeRange}:`, tracks);
+            
+            if (!Array.isArray(tracks) || tracks.length === 0) {
+                trackList.innerHTML = '<li class="loading">No track data available for this time range</li>';
+                return;
+            }
+            
+            try {
+                trackList.innerHTML = tracks.slice(0, 10).map(track => `
+                    <li class="track-item">
+                        <img src="${track.image_url || '/images/default-album.png'}" 
+                             alt="${track.name || 'Unknown Track'}" 
+                             class="track-image"
+                             onerror="this.src='/images/default-album.png'">
+                        <div class="track-info">
+                            <div class="track-name">${track.name || 'Unknown Track'}</div>
+                            <div class="track-artist">${Array.isArray(track.artists) ? track.artists.join(', ') : 'Unknown Artist'}</div>
+                        </div>
+                    </li>
+                `).join('');
+            } catch (error) {
+                console.error('Error displaying tracks:', error);
+                trackList.innerHTML = '<li class="error">Error displaying tracks</li>';
+            }
+        }
+
+        // Display recently played tracks
+        function displayRecentlyPlayed() {
+            const recentList = document.getElementById('recentlyPlayedList');
+            const tracks = recentlyPlayedData.tracks || [];
+            
+            console.log('Recently played tracks:', tracks);
+            
+            if (!Array.isArray(tracks) || tracks.length === 0) {
+                recentList.innerHTML = '<li class="track-item">No recently played tracks available</li>';
+                return;
+            }
+            
+            try {
+                recentList.innerHTML = tracks.slice(0, 15).map(track => `
+                    <li class="track-item">
+                        <img src="${track.image_url || '/images/default-album.png'}" 
+                             alt="${track.name || 'Unknown Track'}" 
+                             class="track-image"
+                             onerror="this.src='/images/default-album.png'">
+                        <div class="track-info">
+                            <div class="track-name">${track.name || 'Unknown Track'}</div>
+                            <div class="track-artist">${Array.isArray(track.artists) ? track.artists.join(', ') : 'Unknown Artist'}</div>
+                        </div>
+                    </li>
+                `).join('');
+            } catch (error) {
+                console.error('Error displaying recently played:', error);
+                recentList.innerHTML = '<li class="error">Error displaying recently played tracks</li>';
+            }
+        }
+
+        // Display listening statistics
+        function displayListeningStats() {
+            const statsContainer = document.getElementById('listeningStats');
+            const shortTermArtists = musicAnalysisData.short_term_artists || [];
+            const shortTermTracks = musicAnalysisData.short_term_tracks || [];
+            const topGenres = musicAnalysisData.top_genres || [];
+            
+            console.log('Stats data:', { shortTermArtists, shortTermTracks, topGenres });
+            
+            try {
+                const mostPopularGenre = Array.isArray(topGenres) && topGenres.length > 0 
+                    ? (Array.isArray(topGenres[0]) ? topGenres[0][0] : topGenres[0].key || 'N/A')
+                    : 'N/A';
+                
+                statsContainer.innerHTML = `
+                    <div style="display: grid; gap: 1rem;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>Top Artists (4 weeks):</span>
+                            <strong>${Array.isArray(shortTermArtists) ? shortTermArtists.length : 0}</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>Top Tracks (4 weeks):</span>
+                            <strong>${Array.isArray(shortTermTracks) ? shortTermTracks.length : 0}</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>Different Genres:</span>
+                            <strong>${Array.isArray(topGenres) ? topGenres.length : 0}</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>Most Popular Genre:</span>
+                            <strong>${mostPopularGenre}</strong>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error displaying stats:', error);
+                statsContainer.innerHTML = '<div class="error">Error loading statistics</div>';
+            }
+        }
+
+        // Tab functionality for artists
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('tab-button')) {
+                const range = e.target.dataset.range;
+                const type = e.target.dataset.type;
+                
+                // Update active tab
+                const tabs = e.target.parentNode.querySelectorAll('.tab-button');
+                tabs.forEach(tab => tab.classList.remove('active'));
+                e.target.classList.add('active');
+                
+                // Display appropriate content
+                if (type === 'tracks') {
+                    displayTracks(range);
+                } else {
+                    displayArtists(range);
+                }
+            }
+        });
+
+        // Show error message
+        function showError(message) {
+            const container = document.getElementById('analysisContent');
+            container.innerHTML = `<div class="error">${message}</div>`;
+        }
+
+        // Load data when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadMusicAnalysis();
+            loadRecentlyPlayed();
+        });
+    </script>
+</body>
+</html>
