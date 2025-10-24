@@ -3,66 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <title>Messages - Soundscape</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Include the common styles -->
+    <div th:replace="fragments :: common-styles"></div>
 
     <style>
-        :root {
-            --background-color: #121212;
-            --surface-color: #1E1E1E;
-            --primary-text-color: #FFFFFF;
-            --secondary-text-color: #b3b3b3;
-            --accent-color: #1DB954;
-            --border-color: #2a2a2a;
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: var(--background-color);
-            color: var(--primary-text-color);
-            margin: 0;
-            padding: 0;
-        }
-
-        .header {
-            background-color: var(--surface-color);
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .header-logo a {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary-text-color);
-            text-decoration: none;
-        }
-
-        .header-logo i {
-            color: var(--accent-color);
-        }
-
-        .nav-links a {
-            color: var(--secondary-text-color);
-            text-decoration: none;
-            margin-left: 1.5rem;
-            font-size: 1rem;
-            font-weight: 600;
-            transition: color 0.2s ease;
-        }
-
-        .nav-links a:hover {
-            color: var(--accent-color);
-        }
-
         .main-container {
             width: 100%;
             max-width: 600px;
-            margin: 2rem auto;
         }
 
         h1 {
@@ -107,19 +55,26 @@
         }
 
     </style>
+
+    <!-- Make layout scale correctly on phones -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+    <!-- App-like theming for the browser UI bars -->
+    <meta name="theme-color" content="#1DB954">
+
+    <!-- iOS standalone mode + status bar styling -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+
+    <!-- PWA manifest (lets users “Add to Home Screen”) -->
+    <link rel="manifest" href="/static/manifest.json">
+
 </head>
 <body>
 
-<header class="header">
-    <div class="header-logo">
-        <a href="/"><i class="fas fa-headphones-alt"></i> Soundscape</a>
-    </div>
-    <nav class="nav-links">
-        <a href="/posts"><i class="fas fa-stream"></i> Feed</a>
-        <a href="/profile"><i class="fas fa-user"></i> Profile</a>
-        <a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
-    </nav>
-</header>
+<!-- Include nav header from fragments -->
+<div th:replace="fragments/header :: header"></div>
 
 <div class="main-container">
     <h1><i class="fas fa-envelope"></i> Messages</h1>

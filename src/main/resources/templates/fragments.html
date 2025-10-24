@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<!-- Header Fragment -->
+<div th:fragment="header" class="header">
+    <div class="header-logo">
+        <a href="/"><i class="fas fa-headphones-alt"></i> Soundscape</a>
+    </div>
+    <nav class="nav-links">
+        <a href="/now-playing"><i class="fas fa-music"></i> Now Playing</a>
+        <a href="/posts"><i class="fas fa-stream"></i> Feed</a>
+        <a href="/messages"><i class="fas fa-envelope"></i> Messages</a>
+        <a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </nav>
+</div>
+
+<!-- Common Styles Fragment -->
+<th:block th:fragment="common-styles">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        :root {
+            --background-color: #121212;
+            --surface-color: #1E1E1E;
+            --primary-text-color: #FFFFFF;
+            --secondary-text-color: #b3b3b3;
+            --accent-color: #1DB954;
+            --border-color: #2a2a2a;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--primary-text-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            background-color: var(--surface-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .header-logo a {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-text-color);
+            text-decoration: none;
+        }
+
+        .header-logo i {
+            color: var(--accent-color);
+        }
+
+        .nav-links a {
+            color: var(--secondary-text-color);
+            text-decoration: none;
+            margin-left: 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: color 0.2s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-color);
+        }
+    </style>
+</th:block>
+</body>
+</html>
