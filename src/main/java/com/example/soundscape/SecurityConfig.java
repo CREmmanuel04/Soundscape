@@ -32,7 +32,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/register", "/login", "/css/**", "/js/**", "/oauth2/**",
-                                "/login/oauth2/**", "/connect-spotify").permitAll()  // ADD THIS
+                                "/login/oauth2/**", "/connect-spotify", "/auth/spotify").permitAll()  // ADD /auth/spotify
                         .requestMatchers("/", "/posts", "/messages/**",
                                 "/spotify-success", "/music-matches", "/spotify/**").authenticated()
                         .requestMatchers("/h2-console/**").permitAll()
@@ -45,7 +45,7 @@ public class SecurityConfig {
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/login")
-                        .defaultSuccessUrl("/spotify-success", true)
+                        .defaultSuccessUrl("/link-spotify", true)  // Changed to use our custom linking endpoint
                         .failureUrl("/login?error&oauth2Error=true")  // This will help us identify OAuth vs form login errors
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)

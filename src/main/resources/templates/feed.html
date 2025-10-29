@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Feed - Soundscape</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --background-color: #121212;
+            --surface-color: #1E1E1E;
+            --primary-text-color: #FFFFFF;
+            --secondary-text-color: #b3b3b3;
+            --accent-color: #1DB954;
+            --input-background: #333333;
+            --border-color: #2a2a2a;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--primary-text-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Consistent Header/Navbar */
+        .header {
+            background-color: var(--surface-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-logo a {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-text-color);
+            text-decoration: none;
+        }
+
+        .header-logo i { color: var(--accent-color); }
+
+        .nav-links a {
+            color: var(--secondary-text-color);
+            text-decoration: none;
+            margin-left: 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: color 0.2s ease;
+        }
+
+        .nav-links a:hover { color: var(--accent-color); }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        /* Post Composer Card */
+        .composer {
+            background-color: var(--surface-color);
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 80px;
+            background-color: var(--input-background);
+            border: 1px solid transparent;
+            border-radius: 10px;
+            padding: 1rem;
+            color: var(--primary-text-color);
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.1rem; /* Larger font for better readability */
+            resize: vertical;
+            box-sizing: border-box;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+        }
+
+        .count {
+            color: var(--secondary-text-color);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        button {
+            background: var(--accent-color);
+            color: var(--primary-text-color);
+            border: none;
+            border-radius: 999px;
+            padding: 0.6rem 1.2rem;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        button:hover { background-color: #1aa34a; }
+        button:disabled { background: #125227; cursor: not-allowed; }
+
+        /* Post Feed Styling */
+        .feed { display: grid; gap: 1rem; }
+
+        .post {
+            background-color: var(--surface-color);
+            border-radius: 15px;
+            padding: 1.5rem;
+        }
+
+        .meta {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+        .meta .author {
+            font-weight: 600;
+        }
+        .meta .timestamp {
+            color: var(--secondary-text-color);
+        }
+
+        .content {
+            white-space: pre-wrap;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+<header class="header">
+    <div class="header-logo">
+        <a href="/posts"><i class="fas fa-headphones-alt"></i> Soundscape</a>
+    </div>
+    <nav class="nav-links">
+        <a href="/messages"><i class="fas fa-envelope"></i> Messages</a>
+        <a href="/profile"><i class="fas fa-user"></i> Profile</a>
+        <a th:href="@{/logout}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </nav>
+</header>
+
+<div class="container">
+    <div class="composer">
+        <form th:action="@{/posts}" method="post" th:object="${postForm}">
+            <textarea id="content" th:field="*{content}" maxlength="280" placeholder="What's happening in music today?" required></textarea>
+            <div class="actions">
+                <span id="charCount" class="count">280</span>
+                <button type="submit">Post</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="feed">
+        <div th:each="p : ${posts}" class="post">
+            <div class="meta">
+                <span class="author" th:text="${p.author}">author</span>
+                <span class="timestamp" th:text="'&middot; ' + ${#temporals.format(p.createdAt, 'MMM dd')}">time</span>
+            </div>
+            <div class="content" th:text="${p.content}">content</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        const ta = document.getElementById('content');
+        const cc = document.getElementById('charCount');
+        const button = ta.form.querySelector('button');
+        const maxLength = ta.getAttribute('maxlength');
+
+        function update() {
+            const remaining = maxLength - ta.value.length;
+            cc.textContent = remaining;
+            // Disable button if textarea is empty
+            button.disabled = ta.value.trim() === '';
+        }
+        ta.addEventListener('input', update);
+        update(); // Run on page load
+    })();
+</script>
+</body>
+</html>

@@ -40,6 +40,31 @@ public class User {
     @Column(name = "spotify_connected_at")
     private Instant spotifyConnectedAt;
 
+    // NEW: Profile customization fields
+    @Column(name = "profile_icon")
+    private String profileIcon;
+
+    @Column(name = "banner_color")
+    private String bannerColor;
+
+    @Column(name = "bio", length = 500)
+    private String bio;
+
+    @Column(name = "favorite_song_id")
+    private String favoriteSongId;
+
+    @Column(name = "favorite_song_name")
+    private String favoriteSongName;
+
+    @Column(name = "favorite_song_artist")
+    private String favoriteSongArtist;
+
+    @Column(name = "favorite_song_image")
+    private String favoriteSongImage;
+
+    @Column(name = "favorite_song_url")
+    private String favoriteSongUrl;
+
     public User() {}
 
     // Constructor for registration (without Spotify)
@@ -94,4 +119,24 @@ public class User {
     public boolean isSpotifyConnected() {
         return spotifyAccessToken != null && !spotifyAccessToken.isEmpty();
     }
+
+    // NEW: Profile customization getters
+    public String getProfileIcon() { return profileIcon; }
+    public String getBannerColor() { return bannerColor; }
+    public String getBio() { return bio; }
+    public String getFavoriteSongId() { return favoriteSongId; }
+    public String getFavoriteSongName() { return favoriteSongName; }
+    public String getFavoriteSongArtist() { return favoriteSongArtist; }
+    public String getFavoriteSongImage() { return favoriteSongImage; }
+    public String getFavoriteSongUrl() { return favoriteSongUrl; }
+
+    // NEW: Profile customization setters
+    public void setProfileIcon(String profileIcon) { this.profileIcon = profileIcon; }
+    public void setBannerColor(String bannerColor) { this.bannerColor = bannerColor; }
+    public void setBio(String bio) { this.bio = bio; }
+    public void setFavoriteSongId(String favoriteSongId) { this.favoriteSongId = favoriteSongId; }
+    public void setFavoriteSongName(String favoriteSongName) { this.favoriteSongName = favoriteSongName; }
+    public void setFavoriteSongArtist(String favoriteSongArtist) { this.favoriteSongArtist = favoriteSongArtist; }
+    public void setFavoriteSongImage(String favoriteSongImage) { this.favoriteSongImage = favoriteSongImage; }
+    public void setFavoriteSongUrl(String favoriteSongUrl) { this.favoriteSongUrl = favoriteSongUrl; }
 }

@@ -233,9 +233,13 @@
         </div>
         <p class="tagline">Immerse yourself in sound</p>
 
-        <!-- Error Message -->
-        <div th:if="${param.error != null}" class="error-message">
+        <!-- Error Messages -->
+        <div th:if="${param.error != null and param.oauth2Error == null}" class="error-message">
             Invalid username or password
+        </div>
+        
+        <div th:if="${param.oauth2Error != null}" class="error-message">
+            Spotify connection failed. Please check your Spotify Developer Dashboard settings or try again.
         </div>
 
         <form method="post" action="/login" class="login-form">
