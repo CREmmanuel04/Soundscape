@@ -7,10 +7,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -96,5 +95,233 @@ public class SpotifyController {
             spotifyService.startPlayback(userOpt.get().getSpotifyAccessToken());
         }
         return "redirect:/spotify-success";
+    }
+
+    // Enhanced Now Playing with playlists and advanced controls
+    @GetMapping("/now-playing-enhanced")
+    public String nowPlayingEnhanced(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+        if (userDetails == null) {
+            return "redirect:/login";
+        }
+
+        Optional<User> userOpt = userRepository.findByUsername(userDetails.getUsername());
+
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            boolean hasSpotifyToken = user.isSpotifyConnected();
+            model.addAttribute("connected", hasSpotifyToken);
+
+            if (hasSpotifyToken) {
+                // Get Spotify profile
+                Map<String, String> spotifyProfile = spotifyService.getUserProfile(user.getSpotifyAccessToken());
+                model.addAttribute("spotifyProfile", spotifyProfile);
+
+                // Get currently playing track
+                Map<String, String> currentlyPlaying = spotifyService.getCurrentlyPlaying(user.getSpotifyAccessToken());
+                model.addAttribute("trackInfo", currentlyPlaying);
+
+                // Get user's playlists
+                Map<String, Object> playlists = spotifyService.getUserPlaylists(user.getSpotifyAccessToken(), 50);
+                model.addAttribute("playlists", playlists.get("playlists"));
+
+                // Get available devices
+                Map<String, Object> devices = spotifyService.getAvailableDevices(user.getSpotifyAccessToken());
+                model.addAttribute("devices", devices.get("devices"));
+
+                // Pass user to frontend
+                model.addAttribute("user", user);
+            }
+        } else {
+            model.addAttribute("connected", false);
+        }
+
+        return "now-playing-enhanced";
+    }
+
+    // API endpoint for getting playlists (AJAX)
+    @GetMapping("/api/spotify/playlists")
+    @ResponseBody
+    public Map<String, Object> getPlaylists(@AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return Map.of("error", "Not authenticated");
+        }
+
+        Optional<User> userOpt = userRepository.findByUsername(userDetails.getUsername());
+        if (userOpt.isPresent() && userOpt.get().isSpotifyConnected()) {
+            User user = userOpt.get();
+            return spotifyService.getUserPlaylists(user.getSpotifyAccessToken(), 50);
+        }
+
+        return Map.of("error", "Spotify not connected");
+    }
+
+    // API endpoint for getting playlist tracks (AJAX)
+    @GetMapping("/api/spotify/playlist/{playlistId}/tracks")
+    @ResponseBody
+    public Map<String, Object> getPlaylistTracks(
+            @PathVariable String playlistId,
+            @RequestParam(defaultValue = "50") int limit,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return Map.of("error", "Not authenticated");
+        }
+
+        Optional<User> userOpt = userRepository.findByUsername(userDetails.getUsername());
+        if (userOpt.isPresent() && userOpt.get().isSpotifyConnected()) {
+            User user = userOpt.get();
+            return spotifyService.getPlaylistTracks(user.getSpotifyAccessToken(), playlistId, limit);
+        }
+
+        return Map.of("error", "Spotify not connected");
+    }
+
+    // API endpoint for playback control
+    @PostMapping("/api/spotify/control/{action}")
+    @ResponseBody
+    public Map<String, Object> controlPlayback(
+            @PathVariable String action,
+            @RequestParam(required = false) String playlistId,
+            @RequestParam(required = false) Integer volume,
+            @RequestParam(required = false) String deviceId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        if (userDetails == null) {
+            return Map.of("error", "Not authenticated");
+        }
+
+        Optional<User> userOpt = userRepository.findByUsername(userDetails.getUsername());
+        if (!userOpt.isPresent() || !userOpt.get().isSpotifyConnected()) {
+            return Map.of("error", "Spotify not connected");
+        }
+
+        User user = userOpt.get();
+        String accessToken = user.getSpotifyAccessToken();
+
+        try {
+            switch (action.toLowerCase()) {
+                case "play":
+                    if (playlistId != null && !playlistId.isEmpty()) {
+                        spotifyService.playPlaylist(accessToken, playlistId);
+                    } else {
+                        spotifyService.resumePlayback(accessToken);
+                    }
+                    break;
+                case "pause":
+                    spotifyService.pausePlayback(accessToken);
+                    break;
+                case "next":
+                    spotifyService.skipToNext(accessToken);
+                    break;
+                case "previous":
+                    spotifyService.skipToPrevious(accessToken);
+                    break;
+                case "volume":
+                    if (volume != null && volume >= 0 && volume <= 100) {
+                        spotifyService.setVolume(accessToken, volume);
+                    } else {
+                        return Map.of("error", "Invalid volume level");
+                    }
+                    break;
+                case "transfer":
+                    if (deviceId != null && !deviceId.isEmpty()) {
+                        spotifyService.transferPlayback(accessToken, deviceId, true);
+                    } else {
+                        return Map.of("error", "Device ID required");
+                    }
+                    break;
+                default:
+                    return Map.of("error", "Unknown action: " + action);
+            }
+
+            return Map.of("success", true, "action", action);
+
+        } catch (Exception e) {
+            return Map.of("error", "Failed to execute action: " + e.getMessage());
+        }
+    }
+
+    // API endpoint for current playback status
+    @GetMapping("/api/spotify/status")
+    @ResponseBody
+    public Map<String, Object> getPlaybackStatus(@AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return Map.of("error", "Not authenticated");
+        }
+
+        Optional<User> userOpt = userRepository.findByUsername(userDetails.getUsername());
+        if (userOpt.isPresent() && userOpt.get().isSpotifyConnected()) {
+            User user = userOpt.get();
+            Map<String, String> currentlyPlaying = spotifyService.getCurrentlyPlaying(user.getSpotifyAccessToken());
+            return new HashMap<>(currentlyPlaying);
+        }
+
+        return Map.of("error", "Spotify not connected");
+    }
+
+    // API endpoint for devices
+    @GetMapping("/api/spotify/devices")
+    @ResponseBody
+    public Map<String, Object> getDevices(@AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return Map.of("error", "Not authenticated");
+        }
+
+        Optional<User> userOpt = userRepository.findByUsername(userDetails.getUsername());
+        if (userOpt.isPresent() && userOpt.get().isSpotifyConnected()) {
+            User user = userOpt.get();
+            return spotifyService.getAvailableDevices(user.getSpotifyAccessToken());
+        }
+
+        return Map.of("error", "Spotify not connected");
+    }
+
+    // API endpoint for playing a specific playlist
+    @PostMapping("/api/spotify/play-playlist/{playlistId}")
+    @ResponseBody
+    public Map<String, Object> playPlaylist(
+            @PathVariable String playlistId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        if (userDetails == null) {
+            return Map.of("error", "Not authenticated");
+        }
+
+        Optional<User> userOpt = userRepository.findByUsername(userDetails.getUsername());
+        if (!userOpt.isPresent() || !userOpt.get().isSpotifyConnected()) {
+            return Map.of("error", "Spotify not connected");
+        }
+
+        try {
+            User user = userOpt.get();
+            spotifyService.playPlaylist(user.getSpotifyAccessToken(), playlistId);
+            return Map.of("success", true, "playlistId", playlistId);
+        } catch (Exception e) {
+            return Map.of("error", "Failed to play playlist: " + e.getMessage());
+        }
+    }
+
+    // API endpoint for playing a specific track
+    @PostMapping("/api/spotify/play-track/{trackId}")
+    @ResponseBody
+    public Map<String, Object> playTrack(
+            @PathVariable String trackId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        if (userDetails == null) {
+            return Map.of("error", "Not authenticated");
+        }
+
+        Optional<User> userOpt = userRepository.findByUsername(userDetails.getUsername());
+        if (!userOpt.isPresent() || !userOpt.get().isSpotifyConnected()) {
+            return Map.of("error", "Spotify not connected");
+        }
+
+        try {
+            User user = userOpt.get();
+            spotifyService.playTrack(user.getSpotifyAccessToken(), trackId);
+            return Map.of("success", true, "trackId", trackId);
+        } catch (Exception e) {
+            return Map.of("error", "Failed to play track: " + e.getMessage());
+        }
     }
 }

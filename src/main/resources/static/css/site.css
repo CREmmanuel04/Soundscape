@@ -1,0 +1,236 @@
+/* Soundscape Site Styles */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #333;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.container {
+    max-width: 400px;
+    width: 90%;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+}
+
+h1, h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #4a5568;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #4a5568;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+textarea {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+}
+
+input:focus,
+textarea:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.btn {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    margin-bottom: 15px;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+.spotify-btn {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background: #1db954;
+    color: white;
+    text-decoration: none;
+    text-align: center;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    margin-bottom: 15px;
+}
+
+.spotify-btn:hover {
+    background: #1ed760;
+    text-decoration: none;
+    color: white;
+}
+
+.spotify-btn i {
+    margin-right: 10px;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-center a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.text-center a:hover {
+    text-decoration: underline;
+}
+
+.alert {
+    padding: 12px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+.alert-error {
+    background-color: #fed7d7;
+    color: #9b2c2c;
+    border: 1px solid #feb2b2;
+}
+
+.alert-success {
+    background-color: #c6f6d5;
+    color: #276749;
+    border: 1px solid #9ae6b4;
+}
+
+/* Home page styles */
+.header {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+}
+
+.nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.nav-brand {
+    font-size: 24px;
+    font-weight: bold;
+    color: #4a5568;
+    text-decoration: none;
+}
+
+.nav-links {
+    display: flex;
+    gap: 20px;
+    list-style: none;
+}
+
+.nav-links a {
+    color: #4a5568;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.nav-links a:hover {
+    color: #667eea;
+}
+
+.main-content {
+    max-width: 800px;
+    width: 90%;
+    margin: 0 auto;
+}
+
+.post {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 25px;
+    margin-bottom: 20px;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.post-author {
+    font-weight: bold;
+    color: #667eea;
+    margin-bottom: 10px;
+}
+
+.post-content {
+    margin-bottom: 15px;
+    line-height: 1.6;
+}
+
+.post-meta {
+    color: #718096;
+    font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.like-btn {
+    background: none;
+    border: 1px solid #e2e8f0;
+    padding: 5px 10px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.like-btn:hover {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+}
+
+.like-btn.liked {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+}
