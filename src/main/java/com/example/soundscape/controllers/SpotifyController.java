@@ -324,4 +324,54 @@ public class SpotifyController {
             return Map.of("error", "Failed to play track: " + e.getMessage());
         }
     }
+
+    // API endpoint for searching tracks (for favorite song selection)
+    @GetMapping("/api/spotify/search")
+    @ResponseBody
+    public Map<String, Object> searchTracks(
+            @RequestParam String query,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        if (userDetails == null) {
+            return Map.of("error", "Not authenticated");
+        }
+
+        Optional<User> userOpt = userRepository.findByUsername(userDetails.getUsername());
+        if (!userOpt.isPresent() || !userOpt.get().isSpotifyConnected()) {
+            return Map.of("error", "Spotify not connected");
+        }
+
+        try {
+            User user = userOpt.get();
+            var tracks = spotifyService.searchTracks(user.getSpotifyAccessToken(), query);
+            return Map.of("tracks", tracks);
+        } catch (Exception e) {
+            return Map.of("error", "Failed to search tracks: " + e.getMessage());
+        }
+    }
+
+    // API endpoint for playing a specific track (alternative route for compatibility)
+    @PostMapping("/api/spotify/play/{trackId}")
+    @ResponseBody
+    public Map<String, Object> playTrackAlternative(
+            @PathVariable String trackId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        if (userDetails == null) {
+            return Map.of("status", "error", "message", "Not authenticated");
+        }
+
+        Optional<User> userOpt = userRepository.findByUsername(userDetails.getUsername());
+        if (!userOpt.isPresent() || !userOpt.get().isSpotifyConnected()) {
+            return Map.of("status", "error", "message", "Spotify not connected");
+        }
+
+        try {
+            User user = userOpt.get();
+            spotifyService.playTrack(user.getSpotifyAccessToken(), trackId);
+            return Map.of("status", "success", "trackId", trackId);
+        } catch (Exception e) {
+            return Map.of("status", "error", "message", "Failed to play track: " + e.getMessage());
+        }
+    }
 }

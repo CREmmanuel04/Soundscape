@@ -505,8 +505,12 @@
 
         fetch(`/api/spotify/search?query=${encodeURIComponent(query)}`)
             .then(response => response.json())
-            .then(tracks => {
-                displaySearchResults(tracks);
+            .then(data => {
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
+                displaySearchResults(data.tracks || []);
                 searchBtn.innerHTML = '<i class="fas fa-search"></i> Search';
                 searchBtn.disabled = false;
             })
