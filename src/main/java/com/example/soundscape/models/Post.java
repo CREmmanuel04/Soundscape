@@ -14,6 +14,11 @@ public class Post {
 
     private String content;
     private String author;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+    
     private Instant createdAt;
     private int likeCount;
     private boolean edited = false;
@@ -31,11 +36,21 @@ public class Post {
         this.createdAt = Instant.now();
         this.likeCount = 0;
     }
+    
+    // Constructor with user relationship
+    public Post(String content, String author, User user) {
+        this.content = content;
+        this.author = author;
+        this.user = user;
+        this.createdAt = Instant.now();
+        this.likeCount = 0;
+    }
 
     // Getters only (immutable once created)
     public Long getId() {return id;}
     public String getContent() {return content;}
     public String getAuthor() {return author;}
+    public User getUser() {return user;}
     public Instant getCreatedAt() {return createdAt;}
     public int getLikeCount() {return likeCount;}
     public Set<String> getLikedBy() {return likedBy;}

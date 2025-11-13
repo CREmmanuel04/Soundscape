@@ -139,4 +139,38 @@ public class User {
     public void setFavoriteSongArtist(String favoriteSongArtist) { this.favoriteSongArtist = favoriteSongArtist; }
     public void setFavoriteSongImage(String favoriteSongImage) { this.favoriteSongImage = favoriteSongImage; }
     public void setFavoriteSongUrl(String favoriteSongUrl) { this.favoriteSongUrl = favoriteSongUrl; }
+
+    // Helper methods for following functionality
+    @Transient
+    private Long followerCount;
+    
+    @Transient
+    private Long followingCount;
+    
+    @Transient
+    private Boolean isFollowing;
+    
+    public Long getFollowerCount() {
+        return followerCount;
+    }
+    
+    public void setFollowerCount(Long followerCount) {
+        this.followerCount = followerCount;
+    }
+    
+    public Long getFollowingCount() {
+        return followingCount;
+    }
+    
+    public void setFollowingCount(Long followingCount) {
+        this.followingCount = followingCount;
+    }
+    
+    public Boolean getIsFollowing() {
+        return isFollowing;
+    }
+    
+    public void setIsFollowing(Boolean isFollowing) {
+        this.isFollowing = isFollowing;
+    }
 }

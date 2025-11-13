@@ -139,6 +139,47 @@
             transform: translateY(-2px);
         }
 
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .follow-stats {
+            display: flex;
+            gap: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .stat-item {
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .stat-number {
+            display: block;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--accent-color);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .stat-label {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--secondary-text-color);
+            margin-top: 0.2rem;
+        }
+
         .favorite-song {
             background-color: var(--background-color);
             border-radius: 10px;
@@ -298,6 +339,28 @@
                 <a href="/profile/edit" class="btn btn-primary">
                     <i class="fas fa-edit"></i> Edit Profile
                 </a>
+            </div>
+            
+            <!-- Follow/Unfollow Section -->
+            <div class="profile-actions" th:if="${!isOwnProfile}">
+                <button id="followBtn" class="btn btn-primary" 
+                        th:data-user-id="${user.id}"
+                        th:data-following="${user.isFollowing}"
+                        th:text="${user.isFollowing ? 'Unfollow' : 'Follow'}">
+                    Follow
+                </button>
+            </div>
+            
+            <!-- Follow Statistics -->
+            <div class="follow-stats">
+                <div class="stat-item">
+                    <span class="stat-number" id="followerCount" th:text="${user.followerCount != null ? user.followerCount : 0}">0</span>
+                    <span class="stat-label">Followers</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="followingCount" th:text="${user.followingCount != null ? user.followingCount : 0}">0</span>
+                    <span class="stat-label">Following</span>
+                </div>
             </div>
             
             <!-- Favorite Song Section -->
@@ -460,6 +523,22 @@
             
             console.log('Play button event listener added');
         }
+        
+        // Follow/Unfollow functionality
+        const followBtn = document.getElementById('followBtn');
+        if (followBtn) {
+            followBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const userId = this.getAttribute('data-user-id');
+                const isFollowing = this.getAttribute('data-following') === 'true';
+                
+                if (isFollowing) {
+                    unfollowUser(userId);
+                } else {
+                    followUser(userId);
+                }
+            });
+        }
     });
 
     // Enhanced play function with fallback
@@ -586,6 +665,90 @@
             // Button remains clickable with fallback functionality
         }
     }, 5000); // Reduced timeout since button is always clickable now
+
+    // Follow user function
+    function followUser(userId) {
+        const followBtn = document.getElementById('followBtn');
+        const originalText = followBtn.textContent;
+        
+        followBtn.disabled = true;
+        followBtn.textContent = 'Following...';
+        
+        fetch(`/api/follow/${userId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                followBtn.textContent = 'Unfollow';
+                followBtn.setAttribute('data-following', 'true');
+                followBtn.classList.remove('btn-primary');
+                followBtn.classList.add('btn-danger');
+                
+                // Update follower count
+                const followerCountEl = document.getElementById('followerCount');
+                if (followerCountEl) {
+                    followerCountEl.textContent = data.followerCount;
+                }
+            } else {
+                alert(data.message || 'Failed to follow user');
+                followBtn.textContent = originalText;
+            }
+        })
+        .catch(error => {
+            console.error('Error following user:', error);
+            alert('Failed to follow user');
+            followBtn.textContent = originalText;
+        })
+        .finally(() => {
+            followBtn.disabled = false;
+        });
+    }
+
+    // Unfollow user function
+    function unfollowUser(userId) {
+        const followBtn = document.getElementById('followBtn');
+        const originalText = followBtn.textContent;
+        
+        followBtn.disabled = true;
+        followBtn.textContent = 'Unfollowing...';
+        
+        fetch(`/api/follow/${userId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                followBtn.textContent = 'Follow';
+                followBtn.setAttribute('data-following', 'false');
+                followBtn.classList.remove('btn-danger');
+                followBtn.classList.add('btn-primary');
+                
+                // Update follower count
+                const followerCountEl = document.getElementById('followerCount');
+                if (followerCountEl) {
+                    followerCountEl.textContent = data.followerCount;
+                }
+            } else {
+                alert(data.message || 'Failed to unfollow user');
+                followBtn.textContent = originalText;
+            }
+        })
+        .catch(error => {
+            console.error('Error unfollowing user:', error);
+            alert('Failed to unfollow user');
+            followBtn.textContent = originalText;
+        })
+        .finally(() => {
+            followBtn.disabled = false;
+        });
+    }
 </script>
 
 </body>

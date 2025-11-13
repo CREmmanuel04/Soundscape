@@ -2,6 +2,7 @@ package com.example.soundscape.controllers;
 
 import com.example.soundscape.models.User;
 import com.example.soundscape.services.UserService;
+import com.example.soundscape.services.FollowService;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,9 +15,11 @@ import java.util.List;
 public class ProfileController {
 
     private final UserService userService;
+    private final FollowService followService;
 
-    public ProfileController(UserService userService) {
+    public ProfileController(UserService userService, FollowService followService) {
         this.userService = userService;
+        this.followService = followService;
     }
 
     // Available profile icons (emojis)
@@ -41,6 +44,13 @@ public class ProfileController {
         if (user == null) {
             return "redirect:/";
         }
+        
+        // Get current user ID for follow status
+        User currentUser = userService.findByUsername(authentication.getName());
+        Long currentUserId = (currentUser != null) ? currentUser.getId() : null;
+        
+        // Populate follow statistics
+        user = followService.populateFollowStats(user, currentUserId);
         
         model.addAttribute("user", user);
         model.addAttribute("isOwnProfile", targetUsername.equals(authentication.getName()));
