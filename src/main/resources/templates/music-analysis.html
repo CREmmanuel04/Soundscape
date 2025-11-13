@@ -239,8 +239,14 @@
         }
 
         .chart-container {
-            height: 300px;
+            height: 350px;
             margin-top: 1rem;
+            position: relative;
+        }
+        
+        .chart-container canvas {
+            max-width: 100%;
+            height: auto;
         }
 
         .loading {
@@ -485,10 +491,79 @@
                 return;
             }
             
-            const colors = [
-                '#1DB954', '#1ed760', '#1fdf64', '#20e268', '#21e56c',
-                '#22e870', '#23eb74', '#24ee78', '#25f17c', '#26f480'
-            ];
+            // Genre-specific color mapping for better visual distinction
+            const genreColors = {
+                // Rock & Alternative
+                'rock': '#FF6B6B',
+                'alternative': '#FF8E53', 
+                'indie': '#FF6B9D',
+                'punk': '#DC143C',
+                'metal': '#8B0000',
+                'grunge': '#696969',
+                
+                // Pop & Dance
+                'pop': '#4ECDC4',
+                'dance': '#45B7D1',
+                'electronic': '#00CED1',
+                'edm': '#1E90FF',
+                'disco': '#FF69B4',
+                'synth': '#9370DB',
+                
+                // Hip Hop & R&B
+                'rap': '#FFA500',
+                'hip hop': '#FF8C00',
+                'r&b': '#DAA520',
+                'soul': '#CD853F',
+                'funk': '#D2691E',
+                
+                // Jazz & Blues
+                'jazz': '#8A2BE2',
+                'blues': '#4169E1',
+                'swing': '#6A5ACD',
+                
+                // Country & Folk
+                'country': '#32CD32',
+                'folk': '#228B22',
+                'bluegrass': '#9ACD32',
+                
+                // Classical & Ambient
+                'classical': '#FFD700',
+                'ambient': '#F0E68C',
+                'soundtrack': '#DDA0DD',
+                
+                // Latin & World
+                'latin': '#FF1493',
+                'reggae': '#00FF7F',
+                'world': '#20B2AA'
+            };
+            
+            // Function to get color for a genre
+            function getGenreColor(genreName, fallbackIndex) {
+                const lowerGenre = genreName.toLowerCase();
+                
+                // Check for exact matches first
+                if (genreColors[lowerGenre]) {
+                    return genreColors[lowerGenre];
+                }
+                
+                // Check for partial matches (e.g., "indie rock" contains "indie")
+                for (const [key, color] of Object.entries(genreColors)) {
+                    if (lowerGenre.includes(key) || key.includes(lowerGenre)) {
+                        return color;
+                    }
+                }
+                
+                // Fallback to a diverse color palette if no match found
+                const fallbackColors = [
+                    '#1DB954', '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA500',
+                    '#8A2BE2', '#32CD32', '#FFD700', '#FF1493', '#00CED1'
+                ];
+                
+                return fallbackColors[fallbackIndex % fallbackColors.length];
+            }
+            
+            // Generate colors for each genre
+            const colors = genres.map(([genre], index) => getGenreColor(genre, index));
             
             try {
                 genreChart = new Chart(ctx, {
@@ -498,7 +573,10 @@
                         datasets: [{
                             data: genres.map(([, count]) => count),
                             backgroundColor: colors,
-                            borderWidth: 0
+                            borderWidth: 2,
+                            borderColor: '#2a2a2a',
+                            hoverBorderWidth: 3,
+                            hoverBorderColor: '#ffffff'
                         }]
                     },
                     options: {
@@ -506,8 +584,42 @@
                         maintainAspectRatio: false,
                         plugins: {
                             legend: {
-                                display: false
+                                display: true,
+                                position: 'right',
+                                labels: {
+                                    color: '#ffffff',
+                                    font: {
+                                        family: 'Poppins',
+                                        size: 12
+                                    },
+                                    padding: 15,
+                                    usePointStyle: true,
+                                    pointStyle: 'circle'
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(30, 30, 30, 0.9)',
+                                titleColor: '#ffffff',
+                                bodyColor: '#ffffff',
+                                borderColor: '#1DB954',
+                                borderWidth: 1,
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label;
+                                        const value = context.parsed;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = ((value / total) * 100).toFixed(1);
+                                        return `${label}: ${value} tracks (${percentage}%)`;
+                                    }
+                                }
                             }
+                        },
+                        animation: {
+                            animateRotate: true,
+                            duration: 1000
+                        },
+                        onHover: function(event, elements) {
+                            event.native.target.style.cursor = elements.length > 0 ? 'pointer' : 'default';
                         }
                     }
                 });
