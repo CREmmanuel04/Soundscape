@@ -45,7 +45,8 @@ public class SpotifyController {
                 // Get parsed currently playing track
                 Map<String, String> trackInfo = spotifyService.getCurrentlyPlaying(user.getSpotifyAccessToken());
 
-                // === NEW LOGIC START: Fallback to recently played ===
+                // 1. OFFLINE FALLBACK LOGIC
+                // If nothing is playing, try to get the last played song
                 if ("false".equals(trackInfo.get("isPlaying"))) {
                     try {
                         // Fetch 1 recent track
@@ -70,7 +71,7 @@ public class SpotifyController {
                                 trackInfo.put("artistName", artists.get(0));
                             }
 
-                            // Add a special flag so we can change the UI text later if we want
+                            // Add a special flag so we can change the UI text later
                             trackInfo.put("isRecent", "true");
                             // We set isPlaying to true so the player SHOWS the info, even though it's paused
                             trackInfo.put("isPlaying", "true");
@@ -79,10 +80,34 @@ public class SpotifyController {
                         System.out.println("Error fetching fallback recent track: " + e.getMessage());
                     }
                 }
-                // === NEW LOGIC END ===
+
+                // 2. LIKED SONGS LOGIC
+                // Fetch user's saved tracks for the list below
+                try {
+                    java.util.List<Map<String, String>> likedSongs = spotifyService.getUserSavedTracks(user.getSpotifyAccessToken(), 0);
+                    model.addAttribute("likedSongs", likedSongs);
+
+                    // Temporary console log for verification
+                    System.out.println("Fetched " + (likedSongs != null ? likedSongs.size() : 0) + " liked songs.");
+                } catch (Exception e) {
+                    System.out.println("Could not fetch liked songs: " + e.getMessage());
+                    // Add empty list to prevent template errors
+                    model.addAttribute("likedSongs", java.util.Collections.emptyList());
+                }
+
+                // 3. PLAYLISTS LOGIC
+                // Fetch user's playlists
+                try {
+                    Map<String, Object> playlistResult = spotifyService.getUserPlaylists(user.getSpotifyAccessToken(), 50);
+                    if (playlistResult != null && playlistResult.containsKey("items")) {
+                        model.addAttribute("userPlaylists", playlistResult.get("items"));
+                        System.out.println("Fetched " + ((java.util.List<?>)playlistResult.get("items")).size() + " playlists.");
+                    }
+                } catch (Exception e) {
+                    System.out.println("Could not fetch playlists: " + e.getMessage());
+                }
 
                 model.addAttribute("trackInfo", trackInfo);
-
                 // Pass user to frontend (for now-playing.html)
                 model.addAttribute("user", user);
             }
@@ -409,5 +434,19 @@ public class SpotifyController {
         } catch (Exception e) {
             return Map.of("status", "error", "message", "Failed to play track: " + e.getMessage());
         }
+    }
+
+    // API endpoint to fetch more liked songs (for the Load More button)
+    @GetMapping("/api/spotify/saved-tracks")
+    @ResponseBody
+    public java.util.List<Map<String, String>> getMoreSavedTracks(
+            @RequestParam(defaultValue = "0") int offset,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        Optional<User> userOpt = userRepository.findByUsername(userDetails.getUsername());
+        if (userOpt.isPresent() && userOpt.get().isSpotifyConnected()) {
+            return spotifyService.getUserSavedTracks(userOpt.get().getSpotifyAccessToken(), offset);
+        }
+        return java.util.Collections.emptyList();
     }
 }

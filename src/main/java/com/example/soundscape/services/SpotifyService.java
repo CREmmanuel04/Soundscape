@@ -796,4 +796,50 @@ public class SpotifyService {
             System.out.println("Error transferring playback: " + e.getMessage());
         }
     }
+
+    // Get user's saved (liked) tracks with pagination
+    public List<Map<String, String>> getUserSavedTracks(String accessToken, int offset) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(accessToken);
+
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+
+            // Fetch 50 songs, starting from the specific offset
+            String url = "https://api.spotify.com/v1/me/tracks?limit=50&offset=" + offset;
+
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url, HttpMethod.GET, entity, String.class);
+
+            if (response.getStatusCode() == HttpStatus.OK) {
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode root = mapper.readTree(response.getBody());
+                List<Map<String, String>> savedTracks = new ArrayList<>();
+
+                if (root.has("items")) {
+                    for (JsonNode item : root.get("items")) {
+                        JsonNode track = item.get("track");
+                        Map<String, String> trackInfo = new HashMap<>();
+
+                        trackInfo.put("name", track.get("name").asText());
+                        trackInfo.put("artist", track.get("artists").get(0).get("name").asText());
+                        trackInfo.put("uri", track.get("uri").asText());
+
+                        // Get image safely
+                        if (track.get("album").has("images") && track.get("album").get("images").size() > 0) {
+                            trackInfo.put("image", track.get("album").get("images").get(0).get("url").asText());
+                        } else {
+                            trackInfo.put("image", "/images/default.png");
+                        }
+
+                        savedTracks.add(trackInfo);
+                    }
+                }
+                return savedTracks;
+            }
+        } catch (Exception e) {
+            System.out.println("Error fetching saved tracks: " + e.getMessage());
+        }
+        return new ArrayList<>();
+    }
 }
