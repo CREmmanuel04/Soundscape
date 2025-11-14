@@ -2,11 +2,19 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>Now Playing - Soundscape</title>
 
-    <!-- Include common styles and fonts from fragments -->
-    <div th:replace="fragments :: common-styles"></div>
+    <!-- ✅ Include common styles and fonts from fragments -->
+    <th:block th:replace="fragments :: common-styles"></th:block>
+
+    <!-- App-like theming for the browser UI bars -->
+    <meta name="theme-color" content="#1DB954">
+
+    <!-- iOS standalone mode + status bar styling -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
 
     <!-- Page-specific styles -->
     <style>
@@ -14,7 +22,7 @@
             max-width: 600px;
             margin: 0 auto;
             padding: 2rem;
-            background: #1E1E1E;
+            background: var(--surface-color);
             border-radius: 15px;
             margin-top: 2rem;
             text-align: center;
@@ -34,6 +42,7 @@
             border-radius: 10px;
             margin: 1rem 0;
             border-left: 4px solid #1DB954;
+            text-align: left;
         }
 
         .not-connected {
@@ -74,6 +83,13 @@
         #playPauseBtn:hover {
             background: #1ed760;
         }
+
+        @media (max-width: 768px) {
+            .container {
+                margin-top: 1.5rem;
+                padding: 1.5rem 1.25rem;
+            }
+        }
     </style>
 
     <!-- Spotify Web Playback SDK -->
@@ -81,7 +97,7 @@
 </head>
 <body>
 
-<!-- Include nav header from fragments -->
+<!-- ✅ Include nav header from fragments -->
 <div th:replace="fragments :: header"></div>
 
 <div class="container">
@@ -91,7 +107,9 @@
     <div th:if="${connected}">
         <!-- Connection Status Box -->
         <div class="connection-status">
-            <p><i class="fas fa-check-circle" style="color: #1DB954;"></i> Connected to Spotify as
+            <p>
+                <i class="fas fa-check-circle" style="color: #1DB954;"></i>
+                Connected to Spotify as
                 <span th:text="${spotifyProfile.displayName}">User</span>
             </p>
         </div>
@@ -99,11 +117,14 @@
         <div class="track-info" th:if="${trackInfo.isPlaying == 'true'}">
             <!-- Track Display -->
             <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem; text-align: left;">
-                <img th:src="${trackInfo.albumImage}" style="width: 120px; height: 120px; border-radius: 8px; flex-shrink: 0;">
+                <img th:src="${trackInfo.albumImage}"
+                     style="width: 120px; height: 120px; border-radius: 8px; flex-shrink: 0;">
                 <div>
                     <h3 style="margin: 0 0 0.3rem 0;" th:text="${trackInfo.trackName}">Track Name</h3>
-                    <p style="color: #b3b3b3; margin: 0 0 0.2rem 0;" th:text="${'by ' + trackInfo.artistName}">Artist Name</p>
-                    <p style="color: #888; font-size: 0.9rem; margin: 0;" th:text="${'from ' + trackInfo.albumName}">Album Name</p>
+                    <p style="color: #b3b3b3; margin: 0 0 0.2rem 0;"
+                       th:text="${'by ' + trackInfo.artistName}">Artist Name</p>
+                    <p style="color: #888; font-size: 0.9rem; margin: 0;"
+                       th:text="${'from ' + trackInfo.albumName}">Album Name</p>
                 </div>
             </div>
 
@@ -147,7 +168,8 @@
 
         <div class="track-info" th:if="${trackInfo.isPlaying == 'false'}">
             <p>You are currently listening to:</p>
-            <h3 style="color: #b3b3b3; font-style: italic;" th:text="${trackInfo.trackName}">No track playing</h3>
+            <h3 style="color: #b3b3b3; font-style: italic;"
+                th:text="${trackInfo.trackName}">No track playing</h3>
         </div>
     </div>
 
@@ -162,8 +184,9 @@
         <a href="/posts" style="color: #1DB954;">← Back to Feed</a>
     </div>
 </div>
+
 <script>
-    let player; // Add this global variable at the top
+    let player;
     let progressInterval;
 
     function startProgressUpdates() {
@@ -186,9 +209,9 @@
 
     // Spotify Web Playback SDK setup
     window.onSpotifyWebPlaybackSDKReady = () => {
-        const token = '[[${user.spotifyAccessToken}]]'; // We'll need to pass the token from backend
+        const token = '[[${user.spotifyAccessToken}]]';
 
-        player = new Spotify.Player({ // Remove 'const' to use the global variable
+        player = new Spotify.Player({
             name: 'Soundscape Player',
             getOAuthToken: cb => { cb(token); },
             volume: 0.5
@@ -237,7 +260,6 @@
             updatePlayerUI(state);
             updateProgressBar(state);
 
-            // Start continuous updates if playing, stop if paused
             if (!state.paused) {
                 startProgressUpdates();
             } else {
@@ -245,7 +267,6 @@
             }
         });
 
-        // Connect to the player!
         player.connect();
 
         // Control button event listeners
@@ -277,7 +298,6 @@
         document.getElementById('progressBar').addEventListener('input', (e) => {
             const progress = e.target.value;
 
-            // Get the current track duration to calculate seek position
             player.getCurrentState().then(state => {
                 if (!state) {
                     console.error('No player state available');
@@ -287,7 +307,6 @@
                 const duration = state.duration;
                 const seekPosition = (progress / 100) * duration;
 
-                // Seek to the calculated position
                 player.seek(seekPosition).then(() => {
                     console.log('Seeked to', formatTime(seekPosition));
                 });
@@ -295,7 +314,6 @@
         });
     };
 
-    // Transfer playback to Web Playback SDK device
     function transferPlayback(deviceId, token) {
         fetch('https://api.spotify.com/v1/me/player', {
             method: 'PUT',
@@ -314,7 +332,6 @@
         });
     }
 
-    // Update player UI based on state
     function updatePlayerUI(state) {
         const playPauseBtn = document.getElementById('playPauseBtn');
         const playPauseIcon = playPauseBtn.querySelector('i');
@@ -325,38 +342,31 @@
             playPauseIcon.className = 'fas fa-pause';
         }
 
-        // Update track info if track changed
         updateTrackInfo(state.track_window.current_track);
     }
 
-    // Update track display with current track info
     function updateTrackInfo(track) {
         if (!track) return;
 
-        console.log('Updating track info:', track.name); // Debug log
+        console.log('Updating track info:', track.name);
 
-        // Update track name - select the h3 element
         const trackNameEl = document.querySelector('.track-info h3');
         if (trackNameEl) trackNameEl.textContent = track.name;
 
-        // Update artist name - select the paragraph that starts with "by"
         const artistNameEl = document.querySelector('.track-info p[style*="color: #b3b3b3"]');
         if (artistNameEl && track.artists.length > 0) {
             artistNameEl.textContent = 'by ' + track.artists[0].name;
         }
 
-        // Update album name - select the paragraph with smaller font
         const albumNameEl = document.querySelector('.track-info p[style*="font-size: 0.9rem"]');
         if (albumNameEl) albumNameEl.textContent = 'from ' + track.album.name;
 
-        // Update album image - select the img element
         const albumImageEl = document.querySelector('.track-info img');
         if (albumImageEl && track.album.images.length > 0) {
             albumImageEl.src = track.album.images[0].url;
         }
     }
 
-    // Update progress bar in real-time
     function updateProgressBar(state) {
         if (!state) return;
 
@@ -370,24 +380,25 @@
         const progress = (currentTime / duration) * 100;
         progressBar.value = progress;
 
-        // Format time (mm:ss)
         currentTimeEl.textContent = formatTime(currentTime);
         totalTimeEl.textContent = formatTime(duration);
     }
 
-    // Format milliseconds to mm:ss
     function formatTime(ms) {
         const minutes = Math.floor(ms / 60000);
         const seconds = Math.floor((ms % 60000) / 1000);
         return minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
     }
 
-    // Fallback if SDK takes time to load
     setTimeout(() => {
         if (!window.Spotify) {
             console.error('Spotify Web Playback SDK failed to load');
         }
     }, 5000);
 </script>
+
+<!-- ✅ Load header.js LAST so the dropdown works reliably on this page too -->
+<th:block th:replace="fragments :: common-scripts"></th:block>
+
 </body>
 </html>

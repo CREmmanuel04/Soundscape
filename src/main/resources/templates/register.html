@@ -193,6 +193,9 @@
 
 </head>
 <body>
+
+<div th:replace="fragments :: header"></div>
+
 <div class="register-container">
     <div class="register-card">
         <div class="logo">
@@ -244,5 +247,8 @@
         </div>
     </div>
 </div>
+
+<th:block th:replace="fragments :: common-scripts"></th:block>
+
 </body>
 </html>

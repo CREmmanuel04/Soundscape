@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8"/>
     <title>Feed - Soundscape</title>
+    <th:block th:replace="fragments :: common-styles"></th:block>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -153,6 +154,8 @@
     </style>
 </head>
 <body>
+<div th:replace="fragments :: header"></div>
+
 <header class="header">
     <div class="header-logo">
         <a href="/posts"><i class="fas fa-headphones-alt"></i> Soundscape</a>
@@ -203,5 +206,7 @@
         update(); // Run on page load
     })();
 </script>
+<th:block th:replace="fragments :: common-scripts"></th:block>
+
 </body>
 </html>

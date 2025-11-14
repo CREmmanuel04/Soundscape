@@ -2,22 +2,50 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>Messages - Soundscape</title>
 
-    <!-- Include the common styles -->
-    <div th:replace="fragments :: common-styles"></div>
+    <!-- ✅ Include the common styles -->
+    <th:block th:replace="fragments :: common-styles"></th:block>
+
+    <!-- App-like theming for the browser UI bars -->
+    <meta name="theme-color" content="#1DB954">
+
+    <!-- iOS standalone mode + status bar styling -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
 
     <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            color: var(--primary-text-color);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .page-shell {
+            width: 100%;
+            max-width: 700px;
+            margin: 2rem auto 3rem;
+            padding: 0 1rem;
+            box-sizing: border-box;
+        }
+
         .main-container {
             width: 100%;
-            max-width: 600px;
         }
 
         h1 {
             text-align: center;
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             margin-bottom: 2rem;
             color: var(--accent-color);
+        }
+
+        h1 i {
+            margin-right: 0.5rem;
         }
 
         .user-list {
@@ -30,7 +58,7 @@
             display: flex;
             align-items: center;
             gap: 1rem;
-            padding: 1.5rem;
+            padding: 1.3rem 1.5rem;
             margin-bottom: 1rem;
             background-color: var(--surface-color);
             border-radius: 10px;
@@ -45,50 +73,55 @@
         }
 
         .user-list-item i {
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             color: var(--secondary-text-color);
         }
 
         .user-list-item span {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 600;
         }
 
+        @media (max-width: 768px) {
+            .page-shell {
+                margin: 1.5rem auto 2rem;
+                padding: 0 0.75rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+        }
     </style>
-
-    <!-- Make layout scale correctly on phones -->
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-
-    <!-- App-like theming for the browser UI bars -->
-    <meta name="theme-color" content="#1DB954">
-
-    <!-- iOS standalone mode + status bar styling -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="/icons/icon-192.png">
-
-
 </head>
 <body>
 
-<!-- Include nav header from fragments -->
-<div th:replace="fragments/header :: header"></div>
+<!-- ✅ Include nav header from fragments -->
+<div th:replace="fragments :: header"></div>
 
-<div class="main-container">
-    <h1><i class="fas fa-envelope"></i> Messages</h1>
+<div class="page-shell">
+    <div class="main-container">
+        <h1><i class="fas fa-envelope"></i> Messages</h1>
 
-    <div th:if="${users.isEmpty()}">
-        <p style="text-align: center; color: var(--secondary-text-color);">No other users to message.</p>
+        <div th:if="${users.isEmpty()}">
+            <p style="text-align: center; color: var(--secondary-text-color);">
+                No other users to message.
+            </p>
+        </div>
+
+        <ul class="user-list">
+            <li th:each="user : ${users}" class="user-list-item">
+                <a th:href="@{/messages/{username}(username=${user.username})}">
+                    <i class="fas fa-user-circle"></i>
+                    <span th:text="${user.username}">Username</span>
+                </a>
+            </li>
+        </ul>
     </div>
-
-    <ul class="user-list">
-        <li th:each="user : ${users}" class="user-list-item">
-            <a th:href="@{/messages/{username}(username=${user.username})}">
-                <i class="fas fa-user-circle"></i>
-                <span th:text="${user.username}">Username</span>
-            </a>
-        </li>
-    </ul>
 </div>
+
+<!-- ✅ Shared JS (header.js) so the dropdown works here -->
+<th:block th:replace="fragments :: common-scripts"></th:block>
+
 </body>
 </html>

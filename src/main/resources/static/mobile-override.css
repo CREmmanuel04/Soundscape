@@ -1,0 +1,25 @@
+document.addEventListener("DOMContentLoaded", function () {
+    // Grab the header and hamburger button
+    const header = document.querySelector(".nav-header");
+    const hamburger = document.querySelector(".nav-hamburger");
+
+    if (!header || !hamburger) {
+        console.log("Soundscape header: .nav-header or .nav-hamburger not found");
+        return;
+    }
+
+    console.log("Soundscape header.js loaded");
+
+    // Toggle the 'nav-open' class on the header when hamburger is clicked
+    hamburger.addEventListener("click", function () {
+        header.classList.toggle("nav-open");
+    });
+
+    // Optional: close the menu when a mobile link is clicked
+    const mobileLinks = header.querySelectorAll(".nav-mobile-menu a");
+    mobileLinks.forEach(link => {
+        link.addEventListener("click", () => {
+            header.classList.remove("nav-open");
+        });
+    });
+});

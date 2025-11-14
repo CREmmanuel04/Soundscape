@@ -2,11 +2,19 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>Feed - Soundscape</title>
 
-    <!-- Include the common styles -->
-    <div th:replace="fragments :: common-styles"></div>
+    <!-- ✅ Include the common styles -->
+    <th:block th:replace="fragments :: common-styles"></th:block>
+
+    <!-- App-like theming for the browser UI bars -->
+    <meta name="theme-color" content="#1DB954">
+
+    <!-- iOS standalone mode + status bar styling -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
 
     <style>
         .container {
@@ -67,7 +75,7 @@
             background-color: var(--surface-color);
             border-radius: 15px;
             margin-bottom: 1.5rem;
-            padding: 1.5rem 1.5rem 0.75rem 1.5rem; /* top, right, bottom, left */
+            padding: 1.5rem 1.5rem 0.75rem 1.5rem;
         }
 
         .post-header {
@@ -92,7 +100,7 @@
             margin-left: auto;
             display: flex;
             align-items: center;
-            gap: 1rem; /* Increased spacing between timestamp elements */
+            gap: 1rem;
         }
 
         .post-content {
@@ -106,8 +114,8 @@
             align-items: center;
             gap: 1rem;
             border-top: 1px solid var(--border-color);
-            padding-top: 0.75rem;  /* Reduced from 1rem */
-            margin-top: 0.5rem;    /* Added some top margin */
+            padding-top: 0.75rem;
+            margin-top: 0.5rem;
         }
 
         .like-btn {
@@ -148,10 +156,10 @@
             border: none;
             color: var(--secondary-text-color);
             cursor: pointer;
-            padding: 0.6rem; /* 2x size from original 0.3rem */
-            border-radius: 6px; /* Slightly larger radius */
+            padding: 0.6rem;
+            border-radius: 6px;
             transition: all 0.2s ease;
-            font-size: 1.2rem; /* Larger dots */
+            font-size: 1.2rem;
         }
 
         .menu-btn:hover {
@@ -167,9 +175,9 @@
             padding: 0.8rem;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
             z-index: 100;
-            min-width: 250px; /* Increased width for better text box */
-            margin-top: 0.5rem; /* More space below button */
-            right: 0; /* Align to right */
+            min-width: 250px;
+            margin-top: 0.5rem;
+            right: 0;
         }
 
         .menu-item {
@@ -178,7 +186,7 @@
 
         .menu-item input {
             width: 100%;
-            max-width: 250px; /* Prevent text box from running off right side */
+            max-width: 250px;
             padding: 0.5rem;
             background: var(--input-background);
             border: 1px solid var(--border-color);
@@ -186,7 +194,7 @@
             color: var(--primary-text-color);
             font-size: 0.9rem;
             margin-bottom: 0.5rem;
-            box-sizing: border-box; /* Ensure padding doesn't cause overflow */
+            box-sizing: border-box;
         }
 
         .menu-item button {
@@ -202,27 +210,14 @@
         .post-menu {
             position: relative;
             display: inline-block;
-            margin-left: 1rem; /* Added space between timestamp and menu */
+            margin-left: 1rem;
         }
     </style>
-
-    <!-- Make layout scale correctly on phones -->
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-
-    <!-- App-like theming for the browser UI bars -->
-    <meta name="theme-color" content="#1DB954">
-
-    <!-- iOS standalone mode + status bar styling -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="/icons/icon-192.png">
-
-
 </head>
 <body>
 
-<!-- Include the common nav header -->
-<div th:replace="fragments/header :: header"></div>
+<!-- ✅ Include the common nav header -->
+<div th:replace="fragments :: header"></div>
 
 <div class="container">
     <!-- SEARCH BAR -->
@@ -266,14 +261,14 @@
                     <span th:text="${post.author}">Author</span>
                     <span th:if="${post.author == #authentication.principal.username}"
                           style="color: var(--accent-color); margin-left: 0.3rem; font-size: 0.8rem;">
-                        (you)
-                    </span>
+                            (you)
+                        </span>
                 </div>
                 <div class="post-timestamp">
                     <span th:text="${@timeFormatter.format(post.createdAt)}">Timestamp</span>
                     <span th:if="${post.edited}" style="color: var(--secondary-text-color); font-size: 0.7rem;">
-                        (edited)
-                    </span>
+                            (edited)
+                        </span>
 
                     <!-- 3-DOT MENU BUTTON (ONLY FOR OWN POSTS) -->
                     <div th:if="${post.author == #authentication.principal.username}" class="post-menu">
@@ -313,6 +308,9 @@
         </div>
     </div>
 </div>
+
+<!-- ✅ Shared JS (header.js) so the dropdown works here too -->
+<th:block th:replace="fragments :: common-scripts"></th:block>
 
 <script>
     function handleEnterKey(event) {
@@ -358,6 +356,5 @@
         }
     });
 </script>
-
 </body>
 </html>
