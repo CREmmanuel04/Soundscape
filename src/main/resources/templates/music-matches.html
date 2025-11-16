@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Music Matches - Soundscape</title>
+    <th:block th:replace="fragments :: common-styles"></th:block>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
@@ -129,6 +130,8 @@
     </style>
 </head>
 <body>
+<div th:replace="fragments :: header"></div>
+
 <header class="header">
     <div class="header-logo">
         <a href="/"><i class="fas fa-headphones-alt"></i> Soundscape</a>
@@ -167,5 +170,7 @@
         </div>
     </div>
 </div>
+<th:block th:replace="fragments :: common-scripts"></th:block>
+
 </body>
 </html>

@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>Now Playing - Soundscape</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://sdk.scdn.co/spotify-player.js"></script>
@@ -54,7 +54,7 @@
             max-width: 600px;
             margin: 3rem auto; /* Added top margin for spacing below header */
             padding: 2rem;
-            background: #1E1E1E;
+            background: var(--surface-color);
             border-radius: 15px;
             text-align: center;
         }
@@ -224,6 +224,9 @@
 
         .song-item:hover .play-icon-small { opacity: 1; }
     </style>
+
+    <!-- Spotify Web Playback SDK -->
+    <script src="https://sdk.scdn.co/spotify-player.js"></script>
 </head>
 <body>
 
@@ -238,11 +241,14 @@
 
         <div class="track-info" th:if="${trackInfo.isPlaying == 'true'}">
             <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem; text-align: left;">
-                <img th:src="${trackInfo.albumImage}" style="width: 120px; height: 120px; border-radius: 8px; flex-shrink: 0;">
+                <img th:src="${trackInfo.albumImage}"
+                     style="width: 120px; height: 120px; border-radius: 8px; flex-shrink: 0;">
                 <div>
                     <h3 style="margin: 0 0 0.3rem 0;" th:text="${trackInfo.trackName}">Track Name</h3>
-                    <p style="color: #b3b3b3; margin: 0 0 0.2rem 0;" th:text="${'by ' + trackInfo.artistName}">Artist Name</p>
-                    <p style="color: #888; font-size: 0.9rem; margin: 0;" th:text="${'from ' + trackInfo.albumName}">Album Name</p>
+                    <p style="color: #b3b3b3; margin: 0 0 0.2rem 0;"
+                       th:text="${'by ' + trackInfo.artistName}">Artist Name</p>
+                    <p style="color: #888; font-size: 0.9rem; margin: 0;"
+                       th:text="${'from ' + trackInfo.albumName}">Album Name</p>
                 </div>
             </div>
 
@@ -271,7 +277,8 @@
 
         <div class="track-info" th:if="${trackInfo.isPlaying == 'false'}">
             <p>You are currently listening to:</p>
-            <h3 style="color: #b3b3b3; font-style: italic;" th:text="${trackInfo.trackName}">No track playing</h3>
+            <h3 style="color: #b3b3b3; font-style: italic;"
+                th:text="${trackInfo.trackName}">No track playing</h3>
         </div>
 
         <div class="playlists-container" th:if="${userPlaylists != null}">
@@ -530,5 +537,9 @@
             });
     }
 </script>
+
+<!-- ✅ Load header.js LAST so the dropdown works reliably on this page too -->
+<th:block th:replace="fragments :: common-scripts"></th:block>
+
 </body>
 </html>

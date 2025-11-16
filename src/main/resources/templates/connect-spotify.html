@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>Connect Spotify - Soundscape</title>
+
+    <th:block th:replace="fragments :: common-scripts"></th:block>
+
     <style>
         body {
             font-family: 'Poppins', sans-serif;
@@ -70,6 +73,18 @@
             color: #1DB954;
         }
     </style>
+
+    <!-- Make layout scale correctly on phones -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+    <!-- App-like theming for the browser UI bars -->
+    <meta name="theme-color" content="#1DB954">
+
+    <!-- iOS standalone mode + status bar styling -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+
 </head>
 <body>
 <div class="container">
@@ -87,5 +102,6 @@
 
     <a href="/" class="back-link">← Back to Home</a>
 </div>
+
 </body>
 </html>

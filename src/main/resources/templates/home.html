@@ -2,64 +2,21 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>Soundscape - Home</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- ✅ Include the common styles correctly -->
+    <th:block th:replace="fragments :: common-styles"></th:block>
+
+    <!-- App-like theming for the browser UI bars -->
+    <meta name="theme-color" content="#1DB954">
+
+    <!-- iOS standalone mode + status bar styling -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
 
     <style>
-        :root {
-            --background-color: #121212;
-            --surface-color: #1E1E1E;
-            --primary-text-color: #FFFFFF;
-            --secondary-text-color: #b3b3b3;
-            --accent-color: #1DB954;
-            --border-color: #2a2a2a;
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: var(--background-color);
-            color: var(--primary-text-color);
-            margin: 0;
-            padding: 0;
-        }
-
-        .header {
-            background-color: var(--surface-color);
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .header-logo a {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary-text-color);
-            text-decoration: none;
-        }
-
-        .header-logo i {
-            color: var(--accent-color);
-        }
-
-        .nav-links a {
-            color: var(--secondary-text-color);
-            text-decoration: none;
-            margin-left: 1.5rem;
-            font-size: 1rem;
-            font-weight: 600;
-            transition: color 0.2s ease;
-        }
-
-        .nav-links a:hover {
-            color: var(--accent-color);
-        }
-
         .container {
             width: 100%;
             max-width: 800px;
@@ -94,6 +51,7 @@
             display: flex;
             justify-content: center;
             gap: 1.5rem;
+            flex-wrap: wrap;
         }
 
         .btn {
@@ -128,22 +86,12 @@
             border-color: var(--secondary-text-color);
             transform: translateY(-3px);
         }
-
     </style>
 </head>
 <body>
-<header class="header">
-    <div class="header-logo">
-        <a href="/"><i class="fas fa-headphones-alt"></i> Soundscape</a>
-    </div>
-    <nav class="nav-links">
-        <a href="/posts"><i class="fas fa-stream"></i> Feed</a>
-        <a href="/messages"><i class="fas fa-envelope"></i> Messages</a>
-        <a href="/music-analysis"><i class="fas fa-chart-line"></i> Music Analysis</a>
-        <a href="/profile"><i class="fas fa-user"></i> Profile</a>
-        <a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
-    </nav>
-</header>
+
+<!-- ✅ Include nav header from fragments (correct path) -->
+<div th:replace="fragments :: header"></div>
 
 <div class="container">
     <div th:if="${param.spotifyTest}" style="background: #1DB954; color: white; padding: 1rem; margin: 1rem 0; border-radius: 10px;">
@@ -166,7 +114,7 @@
         <div th:if="${user != null && user.spotifyUserId == null}" style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #2a2a2a;">
             <h3>Connect Spotify to unlock music features</h3>
             <p style="color: #b3b3b3; margin-bottom: 1.5rem;">Find friends through music, share what you're listening to, and more!</p>
-            <a href="http://127.0.0.1:8080/connect-spotify" class="btn" style="background: #1DB954;">
+            <a th:href="@{/connect-spotify}" class="btn" style="background: #1DB954;">
                 <i class="fab fa-spotify"></i> Connect Spotify
             </a>
         </div>
@@ -186,5 +134,9 @@
         </div>
     </div>
 </div>
+
+<!-- ✅ Load JS (header.js) so hamburger works -->
+<th:block th:replace="fragments :: common-scripts"></th:block>
+
 </body>
 </html>

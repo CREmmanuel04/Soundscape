@@ -2,74 +2,50 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>Messages - Soundscape</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- ✅ Include the common styles -->
+    <th:block th:replace="fragments :: common-styles"></th:block>
+
+    <!-- App-like theming for the browser UI bars -->
+    <meta name="theme-color" content="#1DB954">
+
+    <!-- iOS standalone mode + status bar styling -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
 
     <style>
-        :root {
-            --background-color: #121212;
-            --surface-color: #1E1E1E;
-            --primary-text-color: #FFFFFF;
-            --secondary-text-color: #b3b3b3;
-            --accent-color: #1DB954;
-            --border-color: #2a2a2a;
-        }
-
         body {
-            font-family: 'Poppins', sans-serif;
-            background-color: var(--background-color);
-            color: var(--primary-text-color);
             margin: 0;
             padding: 0;
-        }
-
-        .header {
-            background-color: var(--surface-color);
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .header-logo a {
-            font-size: 1.5rem;
-            font-weight: 700;
+            background-color: var(--background-color);
             color: var(--primary-text-color);
-            text-decoration: none;
+            font-family: 'Poppins', sans-serif;
         }
 
-        .header-logo i {
-            color: var(--accent-color);
-        }
-
-        .nav-links a {
-            color: var(--secondary-text-color);
-            text-decoration: none;
-            margin-left: 1.5rem;
-            font-size: 1rem;
-            font-weight: 600;
-            transition: color 0.2s ease;
-        }
-
-        .nav-links a:hover {
-            color: var(--accent-color);
+        .page-shell {
+            width: 100%;
+            max-width: 700px;
+            margin: 2rem auto 3rem;
+            padding: 0 1rem;
+            box-sizing: border-box;
         }
 
         .main-container {
             width: 100%;
-            max-width: 600px;
-            margin: 2rem auto;
         }
 
         h1 {
             text-align: center;
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             margin-bottom: 2rem;
             color: var(--accent-color);
+        }
+
+        h1 i {
+            margin-right: 0.5rem;
         }
 
         .user-list {
@@ -82,7 +58,7 @@
             display: flex;
             align-items: center;
             gap: 1rem;
-            padding: 1.5rem;
+            padding: 1.3rem 1.5rem;
             margin-bottom: 1rem;
             background-color: var(--surface-color);
             border-radius: 10px;
@@ -97,45 +73,55 @@
         }
 
         .user-list-item i {
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             color: var(--secondary-text-color);
         }
 
         .user-list-item span {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 600;
         }
 
+        @media (max-width: 768px) {
+            .page-shell {
+                margin: 1.5rem auto 2rem;
+                padding: 0 0.75rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+        }
     </style>
 </head>
 <body>
 
-<header class="header">
-    <div class="header-logo">
-        <a href="/"><i class="fas fa-headphones-alt"></i> Soundscape</a>
+<!-- ✅ Include nav header from fragments -->
+<div th:replace="fragments :: header"></div>
+
+<div class="page-shell">
+    <div class="main-container">
+        <h1><i class="fas fa-envelope"></i> Messages</h1>
+
+        <div th:if="${users.isEmpty()}">
+            <p style="text-align: center; color: var(--secondary-text-color);">
+                No other users to message.
+            </p>
+        </div>
+
+        <ul class="user-list">
+            <li th:each="user : ${users}" class="user-list-item">
+                <a th:href="@{/messages/{username}(username=${user.username})}">
+                    <i class="fas fa-user-circle"></i>
+                    <span th:text="${user.username}">Username</span>
+                </a>
+            </li>
+        </ul>
     </div>
-    <nav class="nav-links">
-        <a href="/posts"><i class="fas fa-stream"></i> Feed</a>
-        <a href="/profile"><i class="fas fa-user"></i> Profile</a>
-        <a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
-    </nav>
-</header>
-
-<div class="main-container">
-    <h1><i class="fas fa-envelope"></i> Messages</h1>
-
-    <div th:if="${users.isEmpty()}">
-        <p style="text-align: center; color: var(--secondary-text-color);">No other users to message.</p>
-    </div>
-
-    <ul class="user-list">
-        <li th:each="user : ${users}" class="user-list-item">
-            <a th:href="@{/messages/{username}(username=${user.username})}">
-                <i class="fas fa-user-circle"></i>
-                <span th:text="${user.username}">Username</span>
-            </a>
-        </li>
-    </ul>
 </div>
+
+<!-- ✅ Shared JS (header.js) so the dropdown works here -->
+<th:block th:replace="fragments :: common-scripts"></th:block>
+
 </body>
 </html>

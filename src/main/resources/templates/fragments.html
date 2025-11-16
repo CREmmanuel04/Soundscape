@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+<body>
+
+<!-- ================== Header Fragment ================== -->
+<div th:fragment="header" class="header nav-header">
+    <div class="header-inner">
+        <!-- Logo -->
+        <div class="header-logo">
+            <a href="/"><i class="fas fa-headphones-alt"></i> Soundscape</a>
+        </div>
+
+        <!-- Desktop / tablet nav -->
+        <nav class="nav-links" aria-label="Primary">
+            <a href="/now-playing"><i class="fas fa-music"></i> Now Playing</a>
+            <a href="/posts"><i class="fas fa-stream"></i> Feed</a>
+            <a href="/messages"><i class="fas fa-envelope"></i> Messages</a>
+            <a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </nav>
+
+        <!-- Mobile dropdown button (arrow) -->
+        <button class="nav-hamburger" type="button" aria-label="Toggle navigation">
+            <i class="fas fa-angle-down"></i>
+        </button>
+    </div>
+
+    <!-- Mobile dropdown menu -->
+    <nav class="nav-mobile-menu" aria-label="Mobile menu">
+        <a href="/now-playing"><i class="fas fa-music"></i> Now Playing</a>
+        <a href="/posts"><i class="fas fa-stream"></i> Feed</a>
+        <a href="/messages"><i class="fas fa-envelope"></i> Messages</a>
+        <a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </nav>
+</div>
+
+<!-- ============== Common Styles Fragment ============== -->
+<th:block th:fragment="common-styles">
+    <!-- Fonts & icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+    <style>
+        :root {
+          --background-color: #121212;
+          --surface-color: #1E1E1E;
+          --primary-text-color: #FFFFFF;
+          --secondary-text-color: #b3b3b3;
+          --accent-color: #1DB954;
+          --border-color: #2a2a2a;
+        }
+
+        body {
+          font-family: 'Poppins', sans-serif;
+          background-color: var(--background-color);
+          color: var(--primary-text-color);
+          margin: 0;
+          padding: 0;
+        }
+
+        .header {
+          background-color: var(--surface-color);
+          padding: 1rem 1.25rem;
+          border-bottom: 1px solid var(--border-color);
+          width: 100%;
+          box-sizing: border-box;
+          position: sticky;
+          top: 0;
+          z-index: 40;
+        }
+
+        .nav-header {
+          position: relative; /* so the mobile dropdown can be positioned under it */
+        }
+
+        .header-inner {
+          width: 100%;
+          max-width: 1100px;
+          margin: 0 auto;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 1rem;
+        }
+
+        .header-logo a {
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: var(--primary-text-color);
+          text-decoration: none;
+          display: inline-flex;
+          align-items: center;
+          gap: .5rem;
+        }
+
+        .header-logo i {
+          color: var(--accent-color);
+        }
+
+        .nav-links {
+          display: flex;
+          align-items: center;
+        }
+
+        .nav-links a {
+          color: var(--secondary-text-color);
+          text-decoration: none;
+          margin-left: 1.25rem;
+          font-size: 1rem;
+          font-weight: 600;
+          transition: color 0.2s ease, background 0.2s ease;
+          padding: .4rem .6rem;
+          border-radius: .5rem;
+          display: inline-flex;
+          align-items: center;
+          gap: .4rem;
+        }
+
+        .nav-links a:hover {
+          color: var(--accent-color);
+        }
+
+        /* ===== Dropdown button (arrow) - hidden on desktop ===== */
+        .nav-hamburger {
+          display: none;
+          align-items: center;
+          justify-content: center;
+          width: 36px;
+          height: 36px;
+          border-radius: 999px;
+          border: 1px solid var(--border-color);
+          background: #1a1a1a;
+          cursor: pointer;
+          padding: 0;
+          color: #ffffff;
+          font-size: 1.2rem;
+        }
+
+        /* Smooth rotation for the arrow icon */
+        .nav-hamburger i {
+          transition: transform .2s ease;
+        }
+
+        /* When menu is open, rotate the arrow 180° */
+        .nav-header.nav-open .nav-hamburger i {
+          transform: rotate(180deg);
+        }
+
+        /* ===== Mobile dropdown menu (hidden by default) ===== */
+        .nav-mobile-menu {
+          background: #111;
+          border-top: 1px solid var(--border-color);
+          border-bottom: 1px solid var(--border-color);
+          padding: 0.35rem 0.75rem 0.5rem;
+          box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+          display: none; /* toggled via .nav-header.nav-open */
+          flex-direction: column;
+          gap: 0.25rem;
+        }
+
+        .nav-mobile-menu a {
+          display: flex;
+          align-items: center;
+          gap: 0.6rem;
+          padding: 0.55rem 0.4rem;
+          color: var(--secondary-text-color);
+          border-radius: 0.6rem;
+          text-decoration: none;
+        }
+
+        .nav-mobile-menu a:hover {
+          background: #1a1a1a;
+          color: #fff;
+        }
+
+        /* ===== Mobile behavior (<= 768px) ===== */
+        @media (max-width: 768px) {
+          /* Hide desktop links */
+          .nav-links {
+            display: none;
+          }
+
+          /* Show dropdown button */
+          .nav-hamburger {
+            display: inline-flex;
+          }
+
+          /* When menu is open, show dropdown */
+          .nav-header.nav-open .nav-mobile-menu {
+            display: flex;
+          }
+        }
+
+        /* Tablet overflow */
+        @media (max-width: 1024px) and (min-width: 768px) {
+          .nav-links {
+            overflow-x: auto;
+            white-space: nowrap;
+          }
+        }
+
+        .sr-only {
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          padding: 0;
+          margin: -1px;
+          overflow: hidden;
+          clip: rect(0, 0, 0, 0);
+          border: 0;
+        }
+    </style>
+</th:block>
+
+<!-- ============== Common Scripts Fragment (for hamburger toggle) ============== -->
+<th:block th:fragment="common-scripts">
+    <script th:src="@{/js/header.js}" src="/js/header.js"></script>
+</th:block>
+
+</body>
+</html>
