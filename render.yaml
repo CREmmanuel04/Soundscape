@@ -24,3 +24,19 @@ services:
         fromDatabase:
           name: soundscape-db
           property: connectionString
+      - key: DATABASE_HOST
+        fromDatabase:
+          name: soundscape-db
+          property: host
+      - key: DATABASE_NAME
+        fromDatabase:
+          name: soundscape-db
+          property: database
+      - key: DATABASE_USER
+        fromDatabase:
+          name: soundscape-db
+          property: user
+      - key: DATABASE_PASSWORD
+        fromDatabase:
+          name: soundscape-db
+          property: password

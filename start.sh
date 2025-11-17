@@ -1,27 +1,11 @@
 #!/bin/sh
-# Convert Render's DATABASE_URL format (postgres://) to Spring Boot format (jdbc:postgresql://)
-if [ -n "$DATABASE_URL" ]; then
-    # Convert postgres:// or postgresql:// to jdbc:postgresql://
-    JDBC_URL=$(echo "$DATABASE_URL" | sed -E 's|^(postgres(ql)?://)|jdbc:postgresql://|')
-    
-    # Fix Render's internal hostname format (add full domain if missing)
-    # Render internal hostnames look like: dpg-xxxxx-a (missing domain)
-    # Try adding the full Render PostgreSQL domain
-    JDBC_URL=$(echo "$JDBC_URL" | sed -E 's|@(dpg-[a-z0-9]+-[a-z0-9]+)(/)|@\1.oregon-postgres.render.com\2|')
-    
-    # Add SSL parameters for Render PostgreSQL
-    if echo "$JDBC_URL" | grep -q "?"; then
-        JDBC_URL="${JDBC_URL}&sslmode=require"
-    else
-        JDBC_URL="${JDBC_URL}?sslmode=require"
-    fi
-    
-    export SPRING_DATASOURCE_URL="$JDBC_URL"
-    echo "Original DATABASE_URL: $DATABASE_URL"
-    echo "Converted to JDBC URL: $JDBC_URL"
-else
-    echo "WARNING: DATABASE_URL not set!"
-fi
+# Database connection info will be provided via individual environment variables
+# by Render (DATABASE_HOST, DATABASE_NAME, DATABASE_USER, DATABASE_PASSWORD)
+
+echo "Connecting to database:"
+echo "  Host: ${DATABASE_HOST}"
+echo "  Database: ${DATABASE_NAME}"
+echo "  User: ${DATABASE_USER}"
 
 # Start the application
 exec java -Dspring.profiles.active=prod -Dserver.port="${PORT:-8080}" -jar app.jar
