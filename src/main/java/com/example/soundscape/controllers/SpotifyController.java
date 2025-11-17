@@ -475,6 +475,7 @@ public class SpotifyController {
     @PostMapping("/api/spotify/share")
     @ResponseBody
     public Map<String, Object> shareCurrentTrack(
+            @RequestParam(required = false, defaultValue = "") String caption, // <-- ADDED THIS
             @AuthenticationPrincipal UserDetails userDetails) {
 
         if (userDetails == null) {
@@ -495,13 +496,17 @@ public class SpotifyController {
             String trackName = trackInfo.get("trackName");
             String artistName = trackInfo.get("artistName");
             String trackId = trackInfo.get("trackId");
+            String albumImage = trackInfo.get("albumImage");
 
-            // 2. Create the post content
-            String content = "🎧 Now Playing: " + trackName + " by " + artistName;
+            // 2. Create the post content (use caption, or a default)
+            String content = caption.isBlank() ? "🎧 Listening now..." : caption;
 
             // 3. Create and save the new post
             Post post = new Post(content, user.getUsername(), user);
             post.setSpotifyTrackId(trackId); // Attach the song ID
+            post.setSharedSongName(trackName); // Attach the song name
+            post.setSharedSongArtist(artistName); // Attach the artist name
+            post.setSharedSongImage(albumImage); // Attach the album image
             postRepository.save(post);
 
             return Map.of("success", true, "message", "Shared to feed!");

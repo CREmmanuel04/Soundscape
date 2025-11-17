@@ -307,6 +307,69 @@
             display: inline-block;
             margin-left: 1rem; /* Added space between timestamp and menu */
         }
+
+        /* --- Replace all old song-share CSS with this --- */
+
+        .song-share-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1rem;
+            background: var(--input-background);
+            padding: 0.8rem 1.2rem;
+            border-radius: 12px;
+            /* Make the whole container a clickable link */
+            text-decoration: none;
+            color: var(--primary-text-color);
+            transition: background-color 0.2s;
+        }
+        .song-share-container:hover {
+            background-color: #444; /* Darker hover */
+        }
+
+        /* The new album art container */
+        .song-share-art {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            flex-shrink: 0;
+            position: relative; /* For the hover icon */
+            background-size: cover;
+            background-position: center;
+            overflow: hidden; /* Ensures icon stays rounded */
+        }
+
+        /* The hover-to-show play icon */
+        .song-share-art .play-icon-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            opacity: 0; /* Hidden by default */
+            transition: opacity 0.2s;
+        }
+        .song-share-container:hover .play-icon-overlay {
+            opacity: 1; /* Show on hover */
+        }
+
+        .song-share-info {
+            font-size: 0.9rem;
+            line-height: 1.4;
+            flex-grow: 1;
+        }
+        .song-share-info strong {
+            color: var(--primary-text-color);
+        }
+        .song-share-info span {
+            color: var(--secondary-text-color);
+        }
     </style>
 </head>
 <body>
@@ -397,11 +460,23 @@
             </div>
             <p class="post-content" th:text="${post.content}">Post content</p>
 
-            <div th:if="${post.spotifyTrackId != null}">
-                <a th:href="@{/now-playing(playTrackId=${post.spotifyTrackId})}" class="play-on-feed-btn">
-                    <i class="fas fa-play"></i> Play on Soundscape
-                </a>
-            </div>
+            <!-- Song share section -->
+            <a th:if="${post.spotifyTrackId != null}"
+               th:href="@{/now-playing(playTrackId=${post.spotifyTrackId})}"
+               class="song-share-container">
+
+                <div class="song-share-art"
+                     th:style="'background-image: url(' + ${post.sharedSongImage} + ');'">
+                    <div class="play-icon-overlay">
+                        <i class="fas fa-play"></i>
+                    </div>
+                </div>
+
+                <div class="song-share-info">
+                    <strong th:text="${post.sharedSongName}">Song Name</strong><br>
+                    <span th:text="${post.sharedSongArtist}">Artist Name</span>
+                </div>
+            </a>
 
             <div class="post-actions">
                 <!-- LIKE BUTTON -->
