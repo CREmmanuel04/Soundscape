@@ -31,12 +31,12 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/register", "/login", "/css/**", "/js/**", "/oauth2/**",
-                                "/login/oauth2/**", "/connect-spotify", "/auth/spotify").permitAll()  // ADD /auth/spotify
-                        .requestMatchers("/", "/posts", "/messages/**",
-                                "/spotify-success", "/music-matches", "/spotify/**").authenticated()
+                        // This allows the login page, register page, and all static assets
+                        .requestMatchers("/register", "/login", "/css/**", "/js/**").permitAll()
+                        // This allows the h2 database console
                         .requestMatchers("/h2-console/**").permitAll()
-                        .anyRequest().permitAll()
+                        // This requires authentication for everything else
+                        .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
