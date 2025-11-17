@@ -45,7 +45,7 @@ public class SecurityConfig {
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/login")
-                        .defaultSuccessUrl("/link-spotify", true)  // Changed to use our custom linking endpoint
+                        .defaultSuccessUrl("/", true)  // Changed to use our custom linking endpoint
                         .failureUrl("/login?error&oauth2Error=true")  // This will help us identify OAuth vs form login errors
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)
