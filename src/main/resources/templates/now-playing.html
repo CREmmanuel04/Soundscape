@@ -8,6 +8,74 @@
     <script src="https://sdk.scdn.co/spotify-player.js"></script>
     <style>
         /* --- GLOBAL & HEADER STYLES --- */
+        /* --- Share Modal Styles --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none; /* Hidden by default */
+            align-items: center;
+            justify-content: center;
+            z-index: 1001;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: var(--surface-color, #1E1E1E);
+            padding: 2rem;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 400px;
+            position: relative;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: var(--secondary-text-color, #b3b3b3);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .modal-content h3 {
+            margin-top: 0;
+            color: var(--accent-color, #1DB954);
+            text-align: center;
+        }
+
+        .modal-content textarea {
+            width: 100%;
+            min-height: 80px;
+            background-color: var(--input-background, #333);
+            border: 1px solid var(--border-color, #2a2a2a);
+            border-radius: 10px;
+            padding: 1rem;
+            color: var(--primary-text-color, white);
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            resize: vertical;
+            box-sizing: border-box; /* Important */
+        }
+
+        .modal-content .btn-primary {
+            background-color: var(--accent-color, #1DB954);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 1rem;
+            width: 100%;
+        }
+
         body {
             font-family: 'Poppins', sans-serif; /* Updated to match other pages */
             background: #121212;
@@ -331,7 +399,14 @@
             You're logged in but haven't connected Spotify yet.
         </p>
     </div>
-
+    <div id="shareModal" class="modal-overlay">
+        <div class="modal-content">
+            <button id="closeShareModal" class="modal-close" aria-label="Close modal">&times;</button>
+            <h3>Add a Caption</h3>
+            <textarea id="shareCaption" placeholder="What's on your mind?"></textarea>
+            <button id="submitShareBtn" class="btn-primary">Share to Feed</button>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -477,33 +552,70 @@
         return minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
     }
 
-    // --- Feature Functions ---
-    document.getElementById('shareBtn').addEventListener('click', () => {
-        const shareBtn = document.getElementById('shareBtn');
-        shareBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; // Show loading
+    // --- Share to Feed Logic ---
+    const shareBtn = document.getElementById('shareBtn');
+    const shareModal = document.getElementById('shareModal');
+    const closeShareModal = document.getElementById('closeShareModal');
+    const submitShareBtn = document.getElementById('submitShareBtn');
+    const shareCaption = document.getElementById('shareCaption');
 
-        fetch('/api/spotify/share', { method: 'POST' })
-            .then(response => response.json())
-            .then(data => {
-                if(data.success) {
-                    shareBtn.innerHTML = '<i class="fas fa-check"></i>'; // Show success
-                    shareBtn.style.background = '#1DB954'; // Turn green
-                } else {
-                    alert(data.message || 'Could not share track.');
-                    shareBtn.innerHTML = '<i class="fas fa-share"></i>'; // Reset
-                }
+    // Open the modal when share button is clicked
+    if(shareBtn) {
+        shareBtn.addEventListener('click', () => {
+            shareModal.style.display = 'flex';
+        });
+    }
 
-                // Reset button after 2 seconds
-                setTimeout(() => {
-                    shareBtn.innerHTML = '<i class="fas fa-share"></i>';
-                    shareBtn.style.background = '#007bff';
-                }, 2000);
+    // Close the modal
+    if(closeShareModal) {
+        closeShareModal.addEventListener('click', () => shareModal.style.display = 'none');
+    }
+    if(shareModal) {
+        shareModal.addEventListener('click', (e) => {
+            if (e.target === shareModal) { // Click on background
+                shareModal.style.display = 'none';
+            }
+        });
+    }
+
+    // Handle the actual post submission
+    if(submitShareBtn) {
+        submitShareBtn.addEventListener('click', () => {
+            const caption = shareCaption.value;
+            submitShareBtn.textContent = 'Sharing...';
+            submitShareBtn.disabled = true;
+
+            fetch(`/api/spotify/share?caption=${encodeURIComponent(caption)}`, {
+                method: 'POST'
             })
-            .catch(err => {
-                console.error('Share error:', err);
-                shareBtn.innerHTML = '<i class="fas fa-share"></i>';
-            });
-    });
+                .then(response => response.json())
+                .then(data => {
+                    if(data.success) {
+                        submitShareBtn.textContent = 'Shared!';
+                        submitShareBtn.style.background = '#1aa34a'; // Darker green
+                    } else {
+                        alert(data.message || 'Could not share track.');
+                        submitShareBtn.textContent = 'Share to Feed';
+                    }
+
+                    // Reset and close modal after 1.5 seconds
+                    setTimeout(() => {
+                        shareModal.style.display = 'none';
+                        submitShareBtn.textContent = 'Share to Feed';
+                        submitShareBtn.style.background = '#1DB954';
+                        submitShareBtn.disabled = false;
+                        shareCaption.value = ''; // Clear text
+                    }, 1500);
+                })
+                .catch(err => {
+                    console.error('Share error:', err);
+                    alert('Error sharing track.');
+                    submitShareBtn.textContent = 'Share to Feed';
+                    submitShareBtn.disabled = false;
+                });
+        });
+    }
+    // --- End Share to Feed Logic ---
 
     function playTrack(uri) {
         console.log("Playing:", uri);

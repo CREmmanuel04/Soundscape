@@ -307,6 +307,43 @@
             display: inline-block;
             margin-left: 1rem; /* Added space between timestamp and menu */
         }
+
+        .song-share-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem; /* Space between button and text */
+            margin-top: 1rem;
+            background: var(--input-background);
+            padding: 0.8rem 1.2rem;
+            border-radius: 12px;
+        }
+
+        /* Make the play button in this container smaller */
+        .song-share-container .play-on-feed-btn {
+            padding: 0.5rem;
+            width: 40px; /* Make it a circle */
+            height: 40px;
+            border-radius: 50%;
+            margin-top: 0; /* Remove old margin */
+            font-size: 1rem; /* Tweak icon size */
+            flex-shrink: 0; /* Stop it from shrinking */
+        }
+
+        .song-share-container .play-on-feed-btn i {
+            margin-right: 0; /* Remove old margin */
+        }
+
+        .song-share-info {
+            font-size: 0.9rem;
+            line-height: 1.4;
+            flex-grow: 1;
+        }
+        .song-share-info strong {
+            color: var(--primary-text-color);
+        }
+        .song-share-info span {
+            color: var(--secondary-text-color);
+        }
     </style>
 </head>
 <body>
@@ -397,10 +434,16 @@
             </div>
             <p class="post-content" th:text="${post.content}">Post content</p>
 
-            <div th:if="${post.spotifyTrackId != null}">
+            <div th:if="${post.spotifyTrackId != null}" class="song-share-container">
+
                 <a th:href="@{/now-playing(playTrackId=${post.spotifyTrackId})}" class="play-on-feed-btn">
-                    <i class="fas fa-play"></i> Play on Soundscape
+                    <i class="fas fa-play"></i>
                 </a>
+
+                <div class="song-share-info">
+                    <strong th:text="${post.sharedSongName}">Song Name</strong><br>
+                    <span th:text="${post.sharedSongArtist}">Artist Name</span>
+                </div>
             </div>
 
             <div class="post-actions">

@@ -27,6 +27,12 @@ public class Post {
     @Column(name = "spotify_track_id")
     private String spotifyTrackId;
 
+    @Column(name = "shared_song_name")
+    private String sharedSongName;
+
+    @Column(name = "shared_song_artist")
+    private String sharedSongArtist;
+
     @ElementCollection
     private Set<String> likedBy = new HashSet<>();
 
@@ -60,9 +66,13 @@ public class Post {
     public boolean isEdited() {return edited;}
     public Instant getEditedAt() {return editedAt;}
     public String getSpotifyTrackId() { return spotifyTrackId; }
+    public String getSharedSongName() { return sharedSongName; }
+    public String getSharedSongArtist() { return sharedSongArtist; }
 
     // Setters
     public void setSpotifyTrackId(String spotifyTrackId) { this.spotifyTrackId = spotifyTrackId; }
+    public void setSharedSongName(String sharedSongName) { this.sharedSongName = sharedSongName; }
+    public void setSharedSongArtist(String sharedSongArtist) { this.sharedSongArtist = sharedSongArtist; }
 
     // Setters (for likes only, posts are immutable)
     public void setLikeCount(int likeCount) {this.likeCount = likeCount;}
