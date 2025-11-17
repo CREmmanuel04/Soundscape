@@ -1,21 +1,97 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-</head>
 <body>
-    <header class="header" th:fragment="header">
-        <div class="header-logo">
-            <a href="/"><i class="fas fa-headphones-alt"></i> Soundscape</a>
-        </div>
-        <nav class="nav-links">
-            <a href="/posts"><i class="fas fa-stream"></i> Feed</a>
-            <a href="/now-playing-enhanced"><i class="fas fa-music"></i> Now Playing</a>
-            <a href="/messages"><i class="fas fa-envelope"></i> Messages</a>
-            <a href="/music-analysis"><i class="fas fa-chart-line"></i> Music Analysis</a>
-            <a href="/profile"><i class="fas fa-user"></i> Profile</a>
-            <a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
-        </nav>
-    </header>
+
+<header class="header" th:fragment="header">
+
+    <style>
+        /* Make header a container for the absolute-positioned menu */
+        .header {
+            position: relative;
+        }
+
+        /* Style the hamburger button */
+        .hamburger-btn {
+            background: none;
+            border: none;
+            /* Use CSS variables from the main page, with fallbacks */
+            color: var(--primary-text-color, white);
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: block; /* Show the hamburger button */
+            padding: 0.5rem;
+            z-index: 1002; /* Make sure button is above menu */
+        }
+
+        /* HIDE the original nav links by default */
+        .nav-links {
+            display: none;
+        }
+
+        /* This is the class our script will toggle */
+        .nav-links.open {
+            display: flex;
+            flex-direction: column; /* Stack links vertically */
+            position: absolute; /* Pop over content */
+            top: 100%; /* Position right below the header */
+            right: 0; /* Align to the right */
+            background: var(--surface-color, #1E1E1E);
+            border: 1px solid var(--border-color, #2a2a2a);
+            border-radius: 8px;
+            width: 250px; /* Set a fixed width for the menu */
+            z-index: 1001; /* Ensure it's on top */
+            padding: 0.5rem 0;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+        }
+
+        /* Style links inside the open menu */
+        .nav-links.open a {
+            padding: 1rem 1.5rem; /* Make them easy to tap */
+            width: 100%;
+            box-sizing: border-box; /* Include padding in width */
+            margin-left: 0; /* Reset margin */
+            border-radius: 0;
+        }
+
+        .nav-links.open a:hover {
+            background-color: var(--input-background, #333);
+        }
+    </style>
+
+    <div class="header-logo">
+        <a href="/"><i class="fas fa-headphones-alt"></i> Soundscape</a>
+    </div>
+
+    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle menu" aria-expanded="false">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <nav class="nav-links" id="mobileNav">
+        <a href="/posts"><i class="fas fa-stream"></i> Feed</a>
+        <a href="/now-playing-enhanced"><i class="fas fa-music"></i> Now Playing</a>
+        <a href="/messages"><i class="fas fa-envelope"></i> Messages</a>
+        <a href="/music-analysis"><i class="fas fa-chart-line"></i> Music Analysis</a>
+        <a href="/profile"><i class="fas fa-user"></i> Profile</a>
+        <a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </nav>
+
+    <script>
+        // This is an IIFE (Immediately Invoked Function Expression)
+        // It runs immediately and keeps variables out of the global scope.
+        (function() {
+            const btn = document.getElementById('hamburgerBtn');
+            const nav = document.getElementById('mobileNav');
+
+            if (btn && nav) {
+                btn.addEventListener('click', function() {
+                    const isOpen = nav.classList.toggle('open');
+                    btn.setAttribute('aria-expanded', isOpen.toString());
+                });
+            }
+        })();
+    </script>
+
+</header>
+
 </body>
 </html>

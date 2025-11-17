@@ -18,6 +18,31 @@
             --border-color: #2a2a2a;
         }
 
+
+        .chat-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-container::-webkit-scrollbar-track {
+            background: #1E1E1E; /* Matches the surface color */
+            border-radius: 4px;
+        }
+
+        .chat-container::-webkit-scrollbar-thumb {
+            background: #444; /* Dark grey handle */
+            border-radius: 4px;
+        }
+
+        .chat-container::-webkit-scrollbar-thumb:hover {
+            background: #1DB954; /* Spotify green on hover */
+        }
+
+        /* For Firefox support */
+        .chat-container {
+            scrollbar-width: thin;
+            scrollbar-color: #444 #1E1E1E;
+        }
+
         body {
             font-family: 'Poppins', sans-serif;
             background-color: var(--background-color);
@@ -110,16 +135,7 @@
 </head>
 <body>
 
-<header class="header">
-    <div class="header-logo">
-        <a href="/"><i class="fas fa-headphones-alt"></i> Soundscape</a>
-    </div>
-    <nav class="nav-links">
-        <a href="/posts"><i class="fas fa-stream"></i> Feed</a>
-        <a href="/profile"><i class="fas fa-user"></i> Profile</a>
-        <a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
-    </nav>
-</header>
+<div th:replace="~{fragments/header :: header}"></div>
 
 <div class="main-container">
     <h1><i class="fas fa-envelope"></i> Messages</h1>
