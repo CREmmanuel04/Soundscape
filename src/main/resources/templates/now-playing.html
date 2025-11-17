@@ -252,6 +252,11 @@
                         <button class="control-btn" id="prevBtn"><i class="fas fa-step-backward"></i></button>
                         <button class="control-btn" id="playPauseBtn"><i class="fas fa-pause"></i></button>
                         <button class="control-btn" id="nextBtn"><i class="fas fa-step-forward"></i></button>
+
+                        <button class="control-btn" id="shareBtn" title="Share to Feed"
+                                style="background: #007bff; width: 40px; height: 40px;">
+                            <i class="fas fa-share"></i>
+                        </button>
                     </div>
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
                         <i class="fas fa-volume-down" style="color: #b3b3b3;"></i>
@@ -473,6 +478,32 @@
     }
 
     // --- Feature Functions ---
+    document.getElementById('shareBtn').addEventListener('click', () => {
+        const shareBtn = document.getElementById('shareBtn');
+        shareBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; // Show loading
+
+        fetch('/api/spotify/share', { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if(data.success) {
+                    shareBtn.innerHTML = '<i class="fas fa-check"></i>'; // Show success
+                    shareBtn.style.background = '#1DB954'; // Turn green
+                } else {
+                    alert(data.message || 'Could not share track.');
+                    shareBtn.innerHTML = '<i class="fas fa-share"></i>'; // Reset
+                }
+
+                // Reset button after 2 seconds
+                setTimeout(() => {
+                    shareBtn.innerHTML = '<i class="fas fa-share"></i>';
+                    shareBtn.style.background = '#007bff';
+                }, 2000);
+            })
+            .catch(err => {
+                console.error('Share error:', err);
+                shareBtn.innerHTML = '<i class="fas fa-share"></i>';
+            });
+    });
 
     function playTrack(uri) {
         console.log("Playing:", uri);

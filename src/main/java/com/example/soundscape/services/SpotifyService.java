@@ -256,6 +256,7 @@ public class SpotifyService {
                     trackInfo.put("artistName", item.get("artists").get(0).get("name").asText());
                     trackInfo.put("albumName", item.get("album").get("name").asText());
                     trackInfo.put("albumImage", item.get("album").get("images").get(0).get("url").asText());
+                    trackInfo.put("trackId", item.get("id").asText());
                     trackInfo.put("isPlaying", "true");
                 } else {
                     trackInfo.put("isPlaying", "false");

@@ -1,8 +1,11 @@
 package com.example.soundscape.controllers;
 
+import com.example.soundscape.models.Post;
 import com.example.soundscape.models.User;
+import com.example.soundscape.repositories.PostRepository;
 import com.example.soundscape.repositories.UserRepository;
 import com.example.soundscape.services.SpotifyService;
+import com.example.soundscape.services.UserService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -18,14 +21,22 @@ public class SpotifyController {
 
     private final UserRepository userRepository;
     private final SpotifyService spotifyService;
+    private final PostRepository postRepository;
+    private final UserService userService;
 
-    public SpotifyController(UserRepository userRepository, SpotifyService spotifyService) {
+    public SpotifyController(UserRepository userRepository, SpotifyService spotifyService, PostRepository postRepository, UserService userService) {
         this.userRepository = userRepository;
         this.spotifyService = spotifyService;
+        this.postRepository = postRepository;
+        this.userService = userService;
     }
 
     @GetMapping("/now-playing")
-    public String nowPlaying(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+    public String nowPlaying(
+            @RequestParam(required = false) String playTrackId,
+            @AuthenticationPrincipal UserDetails userDetails,
+            Model model) {
+
         if (userDetails == null) {
             return "redirect:/login";
         }
@@ -38,6 +49,16 @@ public class SpotifyController {
             model.addAttribute("connected", hasSpotifyToken);
 
             if (hasSpotifyToken) {
+                if (playTrackId != null && !playTrackId.isEmpty()) {
+                    try {
+                        // Tell spotify to play this track
+                        spotifyService.playTrack(user.getSpotifyAccessToken(), playTrackId);
+                        // Give Spotify's API a moment to catch up
+                        Thread.sleep(500);
+                    } catch (Exception e) {
+                        System.out.println("Error auto-playing track: " + e.getMessage());
+                    }
+                }
                 // Get parsed Spotify profile
                 Map<String, String> spotifyProfile = spotifyService.getUserProfile(user.getSpotifyAccessToken());
                 model.addAttribute("spotifyProfile", spotifyProfile);
@@ -448,5 +469,45 @@ public class SpotifyController {
             return spotifyService.getUserSavedTracks(userOpt.get().getSpotifyAccessToken(), offset);
         }
         return java.util.Collections.emptyList();
+    }
+
+    // API endpoint for sharing the current song to the feed
+    @PostMapping("/api/spotify/share")
+    @ResponseBody
+    public Map<String, Object> shareCurrentTrack(
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        if (userDetails == null) {
+            return Map.of("success", false, "message", "Not authenticated");
+        }
+
+        try {
+            User user = userService.findByUsername(userDetails.getUsername());
+            String accessToken = user.getSpotifyAccessToken();
+
+            // 1. Get the currently playing track
+            Map<String, String> trackInfo = spotifyService.getCurrentlyPlaying(accessToken);
+
+            if ("false".equals(trackInfo.get("isPlaying"))) {
+                return Map.of("success", false, "message", "Nothing is playing.");
+            }
+
+            String trackName = trackInfo.get("trackName");
+            String artistName = trackInfo.get("artistName");
+            String trackId = trackInfo.get("trackId");
+
+            // 2. Create the post content
+            String content = "🎧 Now Playing: " + trackName + " by " + artistName;
+
+            // 3. Create and save the new post
+            Post post = new Post(content, user.getUsername(), user);
+            post.setSpotifyTrackId(trackId); // Attach the song ID
+            postRepository.save(post);
+
+            return Map.of("success", true, "message", "Shared to feed!");
+
+        } catch (Exception e) {
+            return Map.of("success", false, "message", "Error sharing track: " + e.getMessage());
+        }
     }
 }

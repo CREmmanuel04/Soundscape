@@ -24,6 +24,9 @@ public class Post {
     private boolean edited = false;
     private Instant editedAt;
 
+    @Column(name = "spotify_track_id")
+    private String spotifyTrackId;
+
     @ElementCollection
     private Set<String> likedBy = new HashSet<>();
 
@@ -56,6 +59,10 @@ public class Post {
     public Set<String> getLikedBy() {return likedBy;}
     public boolean isEdited() {return edited;}
     public Instant getEditedAt() {return editedAt;}
+    public String getSpotifyTrackId() { return spotifyTrackId; }
+
+    // Setters
+    public void setSpotifyTrackId(String spotifyTrackId) { this.spotifyTrackId = spotifyTrackId; }
 
     // Setters (for likes only, posts are immutable)
     public void setLikeCount(int likeCount) {this.likeCount = likeCount;}
