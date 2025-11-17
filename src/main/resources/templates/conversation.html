@@ -74,31 +74,82 @@
             gap: 1rem;
         }
 
-        .message {
-            max-width: 70%;
-            padding: 0.8rem 1.2rem;
-            border-radius: 20px;
-            line-height: 1.4;
+        /* --- Custom Scrollbar --- */
+        .chat-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        .chat-container::-webkit-scrollbar-track {
+            background: #1E1E1E; /* Matches the surface color */
+            border-radius: 4px;
+        }
+        .chat-container::-webkit-scrollbar-thumb {
+            background: #444; /* Dark grey handle */
+            border-radius: 4px;
+        }
+        .chat-container::-webkit-scrollbar-thumb:hover {
+            background: #1DB954; /* Spotify green on hover */
+        }
+        .chat-container {
+            scrollbar-width: thin;
+            scrollbar-color: #444 #1E1E1E;
         }
 
-        .message .sender-name {
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin-bottom: 0.3rem;
-            opacity: 0.8;
+        /* --- New Message Layout --- */
+        .message-row {
+            display: flex;
+            gap: 0.75rem; /* Space between icon and bubble */
+            width: 100%;
+            margin-bottom: 1rem;
         }
 
-        .sent {
+        /* --- Profile Icon --- */
+        .message-icon {
+            font-size: 1.2rem;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--background-color);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            flex-shrink: 0; /* Stop it from shrinking */
+        }
+
+        /* Hide icon for your own messages */
+        .message-row.sent .message-icon {
+            visibility: hidden; /* Keeps alignment, but is invisible */
+        }
+
+        /* --- Timestamp --- */
+        .message-timestamp {
+            font-size: 0.75rem;
+            color: var(--secondary-text-color);
+            padding: 0 0.5rem;
+            margin-top: 0.25rem;
+        }
+
+        /* --- Sent Messages (Right-aligned) --- */
+        .message-row.sent {
+            justify-content: flex-end; /* Pushes bubble to the right */
+        }
+        .message-row.sent .message {
             background-color: var(--sent-bubble-color);
             color: white;
-            align-self: flex-end;
             border-bottom-right-radius: 5px;
         }
+        /* Align timestamp for sent messages */
+        .message-row.sent .message-timestamp {
+            text-align: right;
+        }
 
-        .received {
+        /* --- Received Messages (Left-aligned) --- */
+        .message-row.received {
+            justify-content: flex-start; /* Pushes bubble to the left */
+        }
+        .message-row.received .message {
             background-color: var(--received-bubble-color);
             color: var(--primary-text-color);
-            align-self: flex-start;
             border-bottom-left-radius: 5px;
         }
 
@@ -152,11 +203,24 @@
     </div>
 
     <div id="chatBox" class="chat-container">
-        <div th:each="msg : ${messages}">
-            <div th:class="${msg.sender.id == currentUser.id} ? 'message sent' : 'message received'">
-                <div class="sender-name" th:text="${msg.sender.username}">Sender</div>
-                <div th:text="${msg.content}">Message content</div>
+
+        <div th:each="msg : ${messages}"
+             th:class="${msg.sender.id == currentUser.id} ? 'message-row sent' : 'message-row received'">
+
+            <span class="message-icon"
+                  th:text="${msg.sender.profileIcon != null ? msg.sender.profileIcon : '😀'}">
+            </span>
+
+            <div>
+                <div class="message">
+                    <div th:text="${msg.content}">Message content</div>
+                </div>
+                <div class="message-timestamp"
+                     th:text="${@timeFormatter.format(msg.createdAt)}">
+                    5m ago
+                </div>
             </div>
+
         </div>
     </div>
 
