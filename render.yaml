@@ -1,0 +1,26 @@
+# Render Blueprint for Soundscape Application
+# This file automates deployment to Render
+
+databases:
+  - name: soundscape-db
+    databaseName: soundscape
+    plan: free
+
+services:
+  - type: web
+    name: soundscape
+    runtime: docker
+    plan: free
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: SPOTIFY_CLIENT_ID
+        sync: false
+      - key: SPOTIFY_CLIENT_SECRET
+        sync: false
+      - key: SPOTIFY_REDIRECT_URI
+        sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: soundscape-db
+          property: connectionString
