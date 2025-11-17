@@ -15,8 +15,8 @@
             --primary-text-color: #FFFFFF;
             --secondary-text-color: #b3b3b3;
             --accent-color: #1DB954; /* Spotify-esque green */
-            --sent-bubble-color: #2a5a3c;
-            --received-bubble-color: #333333;
+            --sent-bubble-color: #2a5a3c; /* Darker green for your messages */
+            --received-bubble-color: #333333; /* Dark gray for others' messages */
         }
 
         body {
@@ -65,6 +65,21 @@
             color: var(--accent-color);
         }
 
+        /* --- Custom Scrollbar for Chat Box --- */
+        .chat-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        .chat-container::-webkit-scrollbar-track {
+            background: #1E1E1E;
+            border-radius: 4px;
+        }
+        .chat-container::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 4px;
+        }
+        .chat-container::-webkit-scrollbar-thumb:hover {
+            background: #1DB954;
+        }
         .chat-container {
             flex-grow: 1;
             padding: 1.5rem;
@@ -72,36 +87,75 @@
             display: flex;
             flex-direction: column;
             gap: 1rem;
+            scrollbar-width: thin;
+            scrollbar-color: #444 #1E1E1E;
         }
 
+        /* --- Message Row/Alignment --- */
+        .message-row {
+            display: flex;
+            gap: 0.75rem;
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+
+        /* --- Profile Icon --- */
+        .message-icon {
+            font-size: 1.2rem;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--background-color);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+
+        /* Hide icon for your own messages */
+        .message-row.sent .message-icon {
+            visibility: hidden;
+        }
+
+        /* --- Bubble Styling --- */
         .message {
             max-width: 70%;
-            padding: 0.8rem 1.2rem;
-            border-radius: 20px;
+            padding: 0.8rem 1.2rem 0.5rem 1.2rem; /* Bigger padding */
             line-height: 1.4;
+            font-size: 1.05rem; /* Slightly bigger text */
         }
 
-        .message .sender-name {
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin-bottom: 0.3rem;
+        /* --- Timestamp (now inside bubble) --- */
+        .message-timestamp {
+            font-size: 0.75rem;
+            color: var(--secondary-text-color);
+            text-align: right;
+            margin-top: 0.25rem;
             opacity: 0.8;
         }
 
-        .sent {
+        /* --- Sent Messages (Your messages - Right-aligned) --- */
+        .message-row.sent {
+            justify-content: flex-end; /* Pushes bubble to the right */
+        }
+        .message-row.sent .message {
             background-color: var(--sent-bubble-color);
             color: white;
-            align-self: flex-end;
-            border-bottom-right-radius: 5px;
+            border-radius: 20px 20px 5px 20px; /* Tail on bottom-right */
         }
 
-        .received {
+        /* --- Received Messages (Others' messages - Left-aligned) --- */
+        .message-row.received {
+            justify-content: flex-start; /* Pushes bubble to the left */
+        }
+        .message-row.received .message {
             background-color: var(--received-bubble-color);
             color: var(--primary-text-color);
-            align-self: flex-start;
-            border-bottom-left-radius: 5px;
+            border-radius: 20px 20px 20px 5px; /* Tail on bottom-left */
         }
 
+        /* --- Input Form --- */
         #messageForm {
             display: flex;
             padding: 1.5rem;
@@ -139,7 +193,6 @@
         #messageForm button:hover {
             transform: scale(1.1);
         }
-
     </style>
 </head>
 <body>
@@ -152,11 +205,22 @@
     </div>
 
     <div id="chatBox" class="chat-container">
-        <div th:each="msg : ${messages}">
-            <div th:class="${msg.sender.id == currentUser.id} ? 'message sent' : 'message received'">
-                <div class="sender-name" th:text="${msg.sender.username}">Sender</div>
+
+        <div th:each="msg : ${messages}"
+             th:class="${msg.sender.id == currentUser.id} ? 'message-row sent' : 'message-row received'">
+
+            <span class="message-icon"
+                  th:text="${msg.sender.profileIcon != null ? msg.sender.profileIcon : '😀'}">
+            </span>
+
+            <div class="message">
                 <div th:text="${msg.content}">Message content</div>
+                <div class="message-timestamp"
+                     th:text="${@timeFormatter.format(msg.createdAt)}">
+                    5m ago
+                </div>
             </div>
+
         </div>
     </div>
 
