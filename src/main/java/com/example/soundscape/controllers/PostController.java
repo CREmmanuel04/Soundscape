@@ -1,7 +1,9 @@
 package com.example.soundscape.controllers;
 
 import com.example.soundscape.models.Post;
+import com.example.soundscape.models.User;
 import com.example.soundscape.repositories.PostRepository;
+import com.example.soundscape.repositories.UserRepository;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -16,10 +18,12 @@ import java.util.List;
 
 @Controller
 public class PostController {
-    private PostRepository postRepository;
+    private final PostRepository postRepository;
+    private final UserRepository userRepository;
 
-    public PostController(PostRepository postRepository) {
+    public PostController(PostRepository postRepository, UserRepository userRepository) {
         this.postRepository = postRepository;
+        this.userRepository = userRepository;
     }
 
     @GetMapping("/posts")
@@ -30,8 +34,11 @@ public class PostController {
 
     @PostMapping("/posts")
     public String createPost(@RequestParam String content, @AuthenticationPrincipal UserDetails user) {
-        String author = user.getUsername();
-        Post post = new Post(content, author);
+        String username = user.getUsername();
+        User userEntity = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        Post post = new Post(content, username, userEntity);
         postRepository.save(post);
         return "redirect:/posts";
     }

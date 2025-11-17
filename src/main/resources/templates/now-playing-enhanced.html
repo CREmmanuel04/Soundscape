@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Player - Soundscape</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://sdk.scdn.co/spotify-player.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #121212;
+            color: white;
+            margin: 0;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: #1E1E1E;
+            border-radius: 15px;
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .track-info {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: #333;
+            border-radius: 10px;
+            font-size: 1.2rem;
+        }
+
+        .connection-status {
+            padding: 1rem;
+            background: #2a2a2a;
+            border-radius: 10px;
+            margin: 1rem 0;
+            border-left: 4px solid #1DB954;
+        }
+
+        .not-connected {
+            padding: 2rem;
+            background: #2a2a2a;
+            border-radius: 10px;
+            margin: 2rem 0;
+        }
+
+        .control-btn {
+            background: #333;
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s ease;
+        }
+
+        .control-btn:hover {
+            background: #444;
+        }
+
+        .control-btn i {
+            font-size: 1rem;
+        }
+
+        #playPauseBtn {
+            background: #1DB954;
+            width: 50px;
+            height: 50px;
+        }
+
+        #playPauseBtn:hover {
+            background: #1ed760;
+        }
+
+        /* Playlist styles */
+        .playlists-section {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: #2a2a2a;
+            border-radius: 10px;
+        }
+
+        .playlist-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .playlist-item {
+            background: #333;
+            border-radius: 10px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .playlist-item:hover {
+            background: #444;
+        }
+
+        .playlist-image {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+
+        .playlist-name {
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+            font-size: 0.9rem;
+        }
+
+        .playlist-description {
+            color: #b3b3b3;
+            font-size: 0.8rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .playlist-tracks {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .track-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: #2a2a2a;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .track-item:hover {
+            background: #333;
+        }
+
+        .track-image {
+            width: 50px;
+            height: 50px;
+            border-radius: 4px;
+            margin-right: 15px;
+            object-fit: cover;
+        }
+
+        .track-info {
+            flex-grow: 1;
+        }
+
+        .track-name {
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 2px;
+            font-size: 0.9rem;
+        }
+
+        .track-artist {
+            font-size: 0.8rem;
+            color: #b3b3b3;
+        }
+
+        .track-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .track-duration {
+            color: #888;
+            font-size: 0.85rem;
+        }
+
+        .track-play-icon {
+            color: #1db954;
+            font-size: 1rem;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .track-item:hover .track-play-icon {
+            opacity: 1;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid #1db954;
+            color: #1db954;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .btn-secondary:hover {
+            background: #1db954;
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1><i class="fab fa-spotify" style="color: #1DB954;"></i> Soundscape</h1>
+    <h2>Enhanced Player</h2>
+
+    <div th:if="${connected}">
+        <!-- Connection Status Box -->
+        <div class="connection-status">
+            <p><i class="fas fa-check-circle" style="color: #1DB954;"></i> Connected to Spotify as
+                <span th:text="${spotifyProfile.displayName}">User</span>
+            </p>
+        </div>
+
+        <div class="track-info" th:if="${trackInfo.isPlaying == 'true'}">
+            <!-- Track Display -->
+            <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem; text-align: left;">
+                <img th:src="${trackInfo.albumImage}" style="width: 120px; height: 120px; border-radius: 8px; flex-shrink: 0;">
+                <div>
+                    <h3 style="margin: 0 0 0.3rem 0;" th:text="${trackInfo.trackName}">Track Name</h3>
+                    <p style="color: #b3b3b3; margin: 0 0 0.2rem 0;" th:text="${'by ' + trackInfo.artistName}">Artist Name</p>
+                    <p style="color: #888; font-size: 0.9rem; margin: 0;" th:text="${'from ' + trackInfo.albumName}">Album Name</p>
+                </div>
+            </div>
+
+            <!-- Playback Controls Area -->
+            <div style="border-top: 1px solid #444; padding-top: 1.5rem;">
+                <!-- Control Buttons Row -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <!-- Playback Buttons -->
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <button class="control-btn" id="prevBtn">
+                            <i class="fas fa-step-backward"></i>
+                        </button>
+                        <button class="control-btn" id="playPauseBtn">
+                            <i class="fas fa-pause"></i>
+                        </button>
+                        <button class="control-btn" id="nextBtn">
+                            <i class="fas fa-step-forward"></i>
+                        </button>
+                    </div>
+
+                    <!-- Volume Control -->
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-volume-down" style="color: #b3b3b3;"></i>
+                        <input type="range" id="volumeSlider" min="0" max="100" value="50"
+                               style="width: 100px; accent-color: #1DB954;">
+                        <i class="fas fa-volume-up" style="color: #b3b3b3;"></i>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <span id="currentTime" style="color: #b3b3b3; font-size: 0.8rem; min-width: 40px; line-height: 1;">0:00</span>
+                    <div style="flex-grow: 1; position: relative; display: flex; align-items: center;">
+                        <input type="range" id="progressBar" min="0" max="100" value="0"
+                               style="width: 100%; accent-color: #1DB954; height: 4px;">
+                    </div>
+                    <span id="totalTime" style="color: #b3b3b3; font-size: 0.8rem; min-width: 40px; line-height: 1;">0:00</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="track-info" th:if="${trackInfo.isPlaying == 'false'}">
+            <p>You are currently listening to:</p>
+            <h3 style="color: #b3b3b3; font-style: italic;" th:text="${trackInfo.trackName}">No track playing</h3>
+        </div>
+
+        <!-- Playlists Section -->
+        <div class="playlists-section" id="playlistsSection">
+            <h3 style="margin-top: 0;"><i class="fas fa-list"></i> Your Playlists</h3>
+            <div class="playlist-grid" id="playlistGrid">
+                <p style="color: #b3b3b3;">Loading playlists...</p>
+            </div>
+        </div>
+
+        <!-- Playlist Tracks Section -->
+        <div class="playlists-section" id="playlistTracksSection" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin: 0;"><i class="fas fa-music"></i> <span id="selectedPlaylistName"></span></h3>
+                <button onclick="showPlaylists()" class="btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Playlists
+                </button>
+            </div>
+            <div id="playlistTracks" class="playlist-tracks">
+                <p style="color: #b3b3b3;">Loading tracks...</p>
+            </div>
+        </div>
+    </div>
+
+    <div th:unless="${connected}" class="not-connected">
+        <p>Spotify not connected</p>
+        <p style="color: #b3b3b3; font-size: 0.9rem;">
+            You're logged in but haven't connected Spotify yet.
+        </p>
+    </div>
+
+    <div style="margin-top: 2rem;">
+        <a href="/now-playing" style="color: #1DB954; text-decoration: none; margin-right: 1rem;">
+            <i class="fas fa-arrow-left"></i> Basic Player
+        </a>
+        <a href="/posts" style="color: #1DB954; text-decoration: none;">
+            <i class="fas fa-home"></i> Back to Feed
+        </a>
+    </div>
+</div>
+
+<script>
+    let player; // Add this global variable at the top
+    let progressInterval;
+    let deviceId; // Store the Web Playback SDK device ID
+
+    function startProgressUpdates() {
+        if (progressInterval) clearInterval(progressInterval);
+        progressInterval = setInterval(() => {
+            player.getCurrentState().then(state => {
+                if (state) {
+                    updateProgressBar(state);
+                }
+            });
+        }, 500);
+    }
+
+    function stopProgressUpdates() {
+        if (progressInterval) {
+            clearInterval(progressInterval);
+            progressInterval = null;
+        }
+    }
+
+    // Spotify Web Playback SDK setup
+    window.onSpotifyWebPlaybackSDKReady = () => {
+        const token = '[[${user.spotifyAccessToken}]]';
+
+        player = new Spotify.Player({
+            name: 'Soundscape Enhanced Player',
+            getOAuthToken: cb => { cb(token); },
+            volume: 0.5
+        });
+
+        // Ready
+        player.addListener('ready', ({ device_id }) => {
+            console.log('Ready with Device ID', device_id);
+            deviceId = device_id;
+            
+            // Immediately transfer playback to make this device active and ready
+            transferPlaybackToDevice(device_id, token)
+                .then(() => {
+                    console.log('Device successfully activated and ready for immediate playback');
+                    // Device is now ready for immediate track playback
+                })
+                .catch(error => {
+                    console.log('Device ready but no active playback to transfer (normal for new sessions)');
+                });
+
+            // Check for any existing playback
+            setTimeout(() => {
+                player.getCurrentState().then(state => {
+                    if (state && !state.paused) {
+                        startProgressUpdates();
+                    }
+                });
+            }, 1000);
+        });
+
+        // Not Ready
+        player.addListener('not_ready', ({ device_id }) => {
+            console.log('Device ID has gone offline', device_id);
+        });
+
+        player.addListener('initialization_error', ({ message }) => {
+            console.error('Failed to initialize', message);
+        });
+
+        player.addListener('authentication_error', ({ message }) => {
+            console.error('Failed to authenticate', message);
+        });
+
+        player.addListener('account_error', ({ message }) => {
+            console.error('Failed to validate Spotify account', message);
+        });
+
+        // Player state changes
+        player.addListener('player_state_changed', state => {
+            if (!state) {
+                stopProgressUpdates();
+                return;
+            }
+
+            updatePlayerUI(state);
+            updateProgressBar(state);
+
+            // Start continuous updates if playing, stop if paused
+            if (!state.paused) {
+                startProgressUpdates();
+            } else {
+                stopProgressUpdates();
+            }
+        });
+
+        // Connect to the player!
+        player.connect();
+
+        // Control button event listeners
+        document.getElementById('playPauseBtn').addEventListener('click', () => {
+            player.togglePlay().then(() => {
+                console.log('Toggled playback');
+            });
+        });
+
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            player.nextTrack().then(() => {
+                console.log('Skipped to next track');
+            });
+        });
+
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            player.previousTrack().then(() => {
+                console.log('Skipped to previous track');
+            });
+        });
+
+        document.getElementById('volumeSlider').addEventListener('input', (e) => {
+            const volume = e.target.value / 100;
+            player.setVolume(volume).then(() => {
+                console.log('Volume set to', volume);
+            });
+        });
+
+        document.getElementById('progressBar').addEventListener('input', (e) => {
+            const progress = e.target.value;
+
+            // Get the current track duration to calculate seek position
+            player.getCurrentState().then(state => {
+                if (!state) {
+                    console.error('No player state available');
+                    return;
+                }
+
+                const duration = state.duration;
+                const seekPosition = (progress / 100) * duration;
+
+                // Seek to the calculated position
+                player.seek(seekPosition).then(() => {
+                    console.log('Seeked to', formatTime(seekPosition));
+                });
+            });
+        });
+    };
+
+    // Transfer playback to this Web Playback SDK device to make it active
+    function transferPlaybackToDevice(deviceId, token) {
+        console.log('Transferring playback to device:', deviceId);
+        
+        return fetch('https://api.spotify.com/v1/me/player', {
+            method: 'PUT',
+            headers: {
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                device_ids: [deviceId],
+                play: false // Don't auto-play, just make this the active device
+            })
+        }).then(response => {
+            console.log('Device transfer response status:', response.status);
+            
+            if (response.status === 202 || response.status === 204 || response.status === 200) {
+                console.log('Successfully transferred playback to Web Playback SDK device');
+                return Promise.resolve();
+            } else if (response.status === 404) {
+                // No active playback to transfer - this is normal and means device is ready
+                console.log('No active playback to transfer - device is ready for new playback');
+                return Promise.resolve();
+            } else {
+                console.warn('Device transfer returned status:', response.status);
+                return Promise.resolve(); // Continue anyway, device might still work
+            }
+        });
+    }
+
+    // Update player UI based on state
+    function updatePlayerUI(state) {
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const playPauseIcon = playPauseBtn.querySelector('i');
+
+        if (state.paused) {
+            playPauseIcon.className = 'fas fa-play';
+        } else {
+            playPauseIcon.className = 'fas fa-pause';
+        }
+
+        // Update track info if track changed
+        updateTrackInfo(state.track_window.current_track);
+    }
+
+    // Update track display with current track info
+    function updateTrackInfo(track) {
+        if (!track) return;
+
+        console.log('Updating track info:', track.name); // Debug log
+
+        // Update track name - select the h3 element
+        const trackNameEl = document.querySelector('.track-info h3');
+        if (trackNameEl) trackNameEl.textContent = track.name;
+
+        // Update artist name - select the paragraph that starts with "by"
+        const artistNameEl = document.querySelector('.track-info p[style*="color: #b3b3b3"]');
+        if (artistNameEl && track.artists.length > 0) {
+            artistNameEl.textContent = 'by ' + track.artists[0].name;
+        }
+
+        // Update album name - select the paragraph with smaller font
+        const albumNameEl = document.querySelector('.track-info p[style*="font-size: 0.9rem"]');
+        if (albumNameEl) albumNameEl.textContent = 'from ' + track.album.name;
+
+        // Update album image - select the img element
+        const albumImageEl = document.querySelector('.track-info img');
+        if (albumImageEl && track.album.images.length > 0) {
+            albumImageEl.src = track.album.images[0].url;
+        }
+    }
+
+    // Update progress bar in real-time
+    function updateProgressBar(state) {
+        if (!state) return;
+
+        const progressBar = document.getElementById('progressBar');
+        const currentTimeEl = document.getElementById('currentTime');
+        const totalTimeEl = document.getElementById('totalTime');
+
+        const currentTime = state.position;
+        const duration = state.duration;
+
+        const progress = (currentTime / duration) * 100;
+        progressBar.value = progress;
+
+        // Format time (mm:ss)
+        currentTimeEl.textContent = formatTime(currentTime);
+        totalTimeEl.textContent = formatTime(duration);
+    }
+
+    // Format milliseconds to mm:ss
+    function formatTime(ms) {
+        const minutes = Math.floor(ms / 60000);
+        const seconds = Math.floor((ms % 60000) / 1000);
+        return minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+    }
+
+
+
+    // Show playlists section
+    function showPlaylists() {
+        document.getElementById('playlistsSection').style.display = 'block';
+        document.getElementById('playlistTracksSection').style.display = 'none';
+    }
+
+    // Show playlist tracks
+    function showPlaylistTracks(playlistId, playlistName) {
+        document.getElementById('selectedPlaylistName').textContent = playlistName;
+        document.getElementById('playlistsSection').style.display = 'none';
+        document.getElementById('playlistTracksSection').style.display = 'block';
+        
+        // Load tracks for this playlist
+        loadPlaylistTracks(playlistId);
+    }
+
+    // Load tracks for a specific playlist
+    function loadPlaylistTracks(playlistId) {
+        const tracksContainer = document.getElementById('playlistTracks');
+        tracksContainer.innerHTML = '<p style="color: #b3b3b3;">Loading tracks...</p>';
+        
+        fetch(`/api/spotify/playlist/${playlistId}/tracks`)
+            .then(response => response.json())
+            .then(data => {
+                displayPlaylistTracks(data.items || []);
+            })
+            .catch(error => {
+                console.error('Error loading playlist tracks:', error);
+                tracksContainer.innerHTML = '<p style="color: #ff6b6b;">Failed to load tracks</p>';
+            });
+    }
+
+    // Display playlist tracks
+    function displayPlaylistTracks(tracks) {
+        const tracksContainer = document.getElementById('playlistTracks');
+        if (tracks.length === 0) {
+            tracksContainer.innerHTML = '<p style="color: #b3b3b3;">No tracks found in this playlist</p>';
+            return;
+        }
+
+        tracksContainer.innerHTML = tracks.map(track => `
+            <div class="track-item" onclick="playTrack('${track.uri}')" title="Click to play ${track.name}">
+                <img src="${track.album_images[0]?.url || '/images/default-track.png'}" 
+                     alt="${track.name}" class="track-image">
+                <div class="track-info">
+                    <div class="track-name">${track.name}</div>
+                    <div class="track-artist">${track.artist_name}</div>
+                </div>
+                <div class="track-controls">
+                    <div class="track-duration">${formatDuration(track.duration_ms)}</div>
+                    <i class="fas fa-play track-play-icon" title="Play track"></i>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // Format duration from milliseconds to mm:ss
+    function formatDuration(ms) {
+        const minutes = Math.floor(ms / 60000);
+        const seconds = Math.floor((ms % 60000) / 1000);
+        return minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+    }
+
+    // Play a specific track using the Web Playback SDK
+    function playTrack(trackUri) {
+        console.log('Playing track:', trackUri);
+        
+        // Extract track ID from URI (format: spotify:track:trackId)
+        const trackId = trackUri.split(':')[2];
+        
+        // Find the clicked track item and show loading state
+        const trackItems = document.querySelectorAll('.track-item');
+        let clickedTrackItem = null;
+        
+        trackItems.forEach(item => {
+            if (item.onclick.toString().includes(trackUri)) {
+                clickedTrackItem = item;
+                const playIcon = item.querySelector('.track-play-icon');
+                if (playIcon) {
+                    playIcon.className = 'fas fa-spinner fa-spin track-play-icon';
+                    playIcon.style.opacity = '1';
+                }
+            }
+        });
+
+        const token = '[[${user.spotifyAccessToken}]]';
+        
+        // Function to reset loading states
+        function resetTrackIcons() {
+            trackItems.forEach(item => {
+                const playIcon = item.querySelector('.track-play-icon');
+                if (playIcon) {
+                    playIcon.className = 'fas fa-play track-play-icon';
+                    playIcon.style.opacity = '';
+                    playIcon.style.color = '#1db954';
+                }
+            });
+        }
+
+        // Function to show success state for the playing track
+        function showPlayingState() {
+            if (clickedTrackItem) {
+                const playIcon = clickedTrackItem.querySelector('.track-play-icon');
+                if (playIcon) {
+                    playIcon.className = 'fas fa-volume-up track-play-icon';
+                    playIcon.style.opacity = '1';
+                    playIcon.style.color = '#1db954';
+                }
+            }
+        }
+
+        // Immediate playback function - no device checks, just play
+        function playImmediately() {
+            if (!deviceId) {
+                resetTrackIcons();
+                alert('Player not ready yet. Please wait a moment and try again.');
+                return;
+            }
+
+            // Play the track directly on our device
+            fetch('https://api.spotify.com/v1/me/player/play', {
+                method: 'PUT',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    uris: [trackUri],
+                    device_id: deviceId
+                })
+            })
+            .then(response => {
+                resetTrackIcons();
+                
+                if (response.ok || response.status === 202 || response.status === 204) {
+                    console.log('Successfully started playing track:', trackId);
+                    showPlayingState();
+                    startProgressUpdates();
+                    
+                } else if (response.status === 404) {
+                    // Device not active, try to activate it first then play
+                    console.log('Device not active, activating and retrying...');
+                    transferPlaybackToDevice(deviceId, token)
+                        .then(() => {
+                            // Wait a moment then try playing again
+                            setTimeout(() => {
+                                playImmediately();
+                            }, 1000);
+                        })
+                        .catch(() => {
+                            resetTrackIcons();
+                            alert('Unable to activate player device. Please try again.');
+                        });
+                        
+                } else {
+                    console.error('Failed to play track. Status:', response.status);
+                    response.text().then(text => {
+                        console.error('Response:', text);
+                    });
+                    resetTrackIcons();
+                    alert('Failed to play track. Please try again.');
+                }
+            })
+            .catch(error => {
+                resetTrackIcons();
+                console.error('Error playing track:', error);
+                alert('Error playing track. Please check your connection and try again.');
+            });
+        }
+
+        // Start playback immediately
+        playImmediately();
+    }
+
+    // Load playlists
+    function loadPlaylists() {
+        fetch('/api/spotify/playlists')
+            .then(response => response.json())
+            .then(data => {
+                displayPlaylists(data.items || []);
+            })
+            .catch(error => {
+                console.error('Error loading playlists:', error);
+                document.getElementById('playlistGrid').innerHTML = 
+                    '<p style="color: #ff6b6b;">Failed to load playlists</p>';
+            });
+    }
+
+    function displayPlaylists(playlists) {
+        const grid = document.getElementById('playlistGrid');
+        if (playlists.length === 0) {
+            grid.innerHTML = '<p style="color: #b3b3b3;">No playlists found</p>';
+            return;
+        }
+
+        grid.innerHTML = playlists.map(playlist => `
+            <div class="playlist-item" onclick="showPlaylistTracks('${playlist.id}', '${playlist.name}')">
+                <img src="${playlist.images[0]?.url || '/images/default-playlist.png'}" 
+                     alt="${playlist.name}" class="playlist-image">
+                <div class="playlist-name">${playlist.name}</div>
+                <div class="playlist-description">${playlist.description || playlist.tracks.total + ' songs'}</div>
+            </div>
+        `).join('');
+    }
+
+    function playPlaylist(playlistId) {
+        fetch(`/api/spotify/play-playlist/${playlistId}`, {
+            method: 'POST'
+        })
+        .then(response => {
+            if (response.ok) {
+                console.log('Playing playlist:', playlistId);
+            } else {
+                console.error('Failed to play playlist');
+            }
+        })
+        .catch(error => {
+            console.error('Error playing playlist:', error);
+        });
+    }
+
+    // Initialize player when page loads - ensure device is ready for immediate playback
+    function initializePlayerState() {
+        if (!deviceId) {
+            // Device ID not ready yet, try again in a moment
+            setTimeout(initializePlayerState, 500);
+            return;
+        }
+
+        console.log('Initializing player state for device:', deviceId);
+        
+        const token = '[[${user.spotifyAccessToken}]]';
+        
+        // Make sure our device is the active device for immediate playback
+        transferPlaybackToDevice(deviceId, token)
+            .then(() => {
+                console.log('Device confirmed active and ready for immediate track playback');
+                
+                // Check if there's any current playback to sync with
+                return fetch('https://api.spotify.com/v1/me/player', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                }
+                console.log('No current playback - device ready for new tracks');
+                return null;
+            })
+            .then(data => {
+                if (data && data.is_playing && data.device && data.device.id === deviceId) {
+                    console.log('Syncing with current playback on our device');
+                    startProgressUpdates();
+                } else {
+                    console.log('Player fully initialized and ready for immediate track selection');
+                }
+            })
+            .catch(error => {
+                console.log('Player ready for new playback, error getting current state:', error);
+            });
+    }
+
+    // Load playlists when page loads (only if connected)
+    document.addEventListener('DOMContentLoaded', () => {
+        // Check if user is connected before loading playlists
+        if (document.querySelector('.connection-status')) {
+            loadPlaylists();
+            
+            // Initialize player state immediately for faster readiness
+            setTimeout(initializePlayerState, 1500);
+        }
+    });
+
+    // Fallback if SDK takes time to load
+    setTimeout(() => {
+        if (!window.Spotify) {
+            console.error('Spotify Web Playback SDK failed to load');
+            alert('Spotify player failed to load. Please refresh the page.');
+        } else if (!player) {
+            console.warn('Spotify SDK loaded but player not initialized');
+        } else if (!deviceId) {
+            console.warn('Player initialized but device ID not ready');
+        } else {
+            console.log('Spotify Web Playback SDK fully initialized and ready');
+        }
+    }, 10000);
+</script>
+</body>
+</html>

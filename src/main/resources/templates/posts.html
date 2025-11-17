@@ -142,6 +142,18 @@
             color: var(--secondary-text-color);
         }
 
+        .post-author .author-link {
+            color: var(--primary-text-color);
+            text-decoration: none;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .post-author .author-link:hover {
+            color: var(--accent-color);
+            text-decoration: underline;
+        }
+
         .post-timestamp {
             font-size: 0.8rem;
             color: var(--secondary-text-color);
@@ -314,7 +326,11 @@
             <div class="post-header">
                 <div class="post-author">
                     <i class="fas fa-user-circle"></i>
-                    <span th:text="${post.author}">Author</span>
+                    <a th:if="${post.user != null}" 
+                       th:href="${post.author == #authentication.principal.username ? '/profile' : '/user/' + post.user.id}" 
+                       class="author-link"
+                       th:text="${post.author}">Author</a>
+                    <span th:if="${post.user == null}" th:text="${post.author}">Author</span>
                     <span th:if="${post.author == #authentication.principal.username}"
                           style="color: var(--accent-color); margin-left: 0.3rem; font-size: 0.8rem;">
                         (you)

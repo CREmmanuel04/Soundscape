@@ -497,4 +497,349 @@ public class SpotifyService {
         
         return new HashMap<>();
     }
+
+    // Get user's playlists
+    public Map<String, Object> getUserPlaylists(String accessToken, int limit) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(accessToken);
+
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+            String url = String.format("https://api.spotify.com/v1/me/playlists?limit=%d", limit);
+
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url, HttpMethod.GET, entity, String.class);
+
+            if (response.getStatusCode() == HttpStatus.OK) {
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode root = mapper.readTree(response.getBody());
+                
+                Map<String, Object> result = new HashMap<>();
+                List<Map<String, Object>> playlists = new ArrayList<>();
+                
+                for (JsonNode item : root.get("items")) {
+                    Map<String, Object> playlistInfo = new HashMap<>();
+                    
+                    playlistInfo.put("id", item.get("id").asText());
+                    playlistInfo.put("name", item.get("name").asText());
+                    playlistInfo.put("description", item.has("description") ? item.get("description").asText() : "");
+                    
+                    // Add tracks information for the frontend
+                    Map<String, Object> tracks = new HashMap<>();
+                    tracks.put("total", item.get("tracks").get("total").asInt());
+                    playlistInfo.put("tracks", tracks);
+                    
+                    // Playlist images array (match Spotify API structure)
+                    List<Map<String, Object>> images = new ArrayList<>();
+                    if (item.has("images") && item.get("images").size() > 0) {
+                        for (JsonNode imageNode : item.get("images")) {
+                            Map<String, Object> image = new HashMap<>();
+                            image.put("url", imageNode.get("url").asText());
+                            images.add(image);
+                        }
+                    }
+                    playlistInfo.put("images", images);
+                    
+                    playlists.add(playlistInfo);
+                }
+                
+                // Return structure that matches what the frontend expects
+                result.put("items", playlists); // Changed from "playlists" to "items"
+                result.put("total", root.get("total").asInt());
+                return result;
+            }
+        } catch (Exception e) {
+            System.out.println("Error fetching playlists: " + e.getMessage());
+        }
+        
+        return new HashMap<>();
+    }
+
+    // Play a specific playlist
+    public void playPlaylist(String accessToken, String playlistId) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(accessToken);
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            String playBody = "{\"context_uri\":\"spotify:playlist:" + playlistId + "\"}";
+            HttpEntity<String> entity = new HttpEntity<>(playBody, headers);
+
+            String url = "https://api.spotify.com/v1/me/player/play";
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.PUT, entity, String.class);
+            
+            if (response.getStatusCode().is2xxSuccessful()) {
+                System.out.println("Successfully started playing playlist: " + playlistId);
+            } else {
+                System.out.println("Failed to play playlist. Status: " + response.getStatusCode());
+            }
+
+        } catch (Exception e) {
+            System.out.println("Error playing playlist " + playlistId + ": " + e.getMessage());
+            throw new RuntimeException("Failed to play playlist: " + e.getMessage());
+        }
+    }
+
+
+
+    // Get tracks from a specific playlist
+    public Map<String, Object> getPlaylistTracks(String accessToken, String playlistId, int limit) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(accessToken);
+
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+            String url = String.format("https://api.spotify.com/v1/playlists/%s/tracks?limit=%d", playlistId, limit);
+
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url, HttpMethod.GET, entity, String.class);
+
+            if (response.getStatusCode() == HttpStatus.OK) {
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode root = mapper.readTree(response.getBody());
+                
+                Map<String, Object> result = new HashMap<>();
+                List<Map<String, Object>> tracks = new ArrayList<>();
+                
+                for (JsonNode item : root.get("items")) {
+                    if (item.has("track") && !item.get("track").isNull()) {
+                        JsonNode track = item.get("track");
+                        Map<String, Object> trackInfo = new HashMap<>();
+                        
+                        trackInfo.put("id", track.get("id").asText());
+                        trackInfo.put("name", track.get("name").asText());
+                        trackInfo.put("uri", track.get("uri").asText());
+                        trackInfo.put("duration_ms", track.get("duration_ms").asInt());
+                        
+                        // Artist info
+                        List<String> artists = new ArrayList<>();
+                        for (JsonNode artist : track.get("artists")) {
+                            artists.add(artist.get("name").asText());
+                        }
+                        trackInfo.put("artists", artists);
+                        trackInfo.put("artist_name", String.join(", ", artists));
+                        
+                        // Album info
+                        JsonNode album = track.get("album");
+                        trackInfo.put("album_name", album.get("name").asText());
+                        
+                        // Album images
+                        List<Map<String, Object>> images = new ArrayList<>();
+                        if (album.has("images") && album.get("images").size() > 0) {
+                            for (JsonNode imageNode : album.get("images")) {
+                                Map<String, Object> image = new HashMap<>();
+                                image.put("url", imageNode.get("url").asText());
+                                images.add(image);
+                            }
+                        }
+                        trackInfo.put("album_images", images);
+                        
+                        tracks.add(trackInfo);
+                    }
+                }
+                
+                result.put("items", tracks);
+                result.put("total", root.get("total").asInt());
+                return result;
+            }
+        } catch (Exception e) {
+            System.out.println("Error fetching playlist tracks: " + e.getMessage());
+        }
+        
+        return new HashMap<>();
+    }
+
+    // Enhanced playback control methods
+    public void pausePlayback(String accessToken) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(accessToken);
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+            String url = "https://api.spotify.com/v1/me/player/pause";
+
+            restTemplate.exchange(url, HttpMethod.PUT, entity, String.class);
+            System.out.println("Playback paused");
+
+        } catch (Exception e) {
+            System.out.println("Error pausing playback: " + e.getMessage());
+        }
+    }
+
+    public void resumePlayback(String accessToken) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(accessToken);
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<String> entity = new HttpEntity<>("{}", headers);
+            String url = "https://api.spotify.com/v1/me/player/play";
+
+            restTemplate.exchange(url, HttpMethod.PUT, entity, String.class);
+            System.out.println("Playback resumed");
+
+        } catch (Exception e) {
+            System.out.println("Error resuming playback: " + e.getMessage());
+        }
+    }
+
+    public void skipToNext(String accessToken) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(accessToken);
+
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+            String url = "https://api.spotify.com/v1/me/player/next";
+
+            restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+            System.out.println("Skipped to next track");
+
+        } catch (Exception e) {
+            System.out.println("Error skipping to next track: " + e.getMessage());
+        }
+    }
+
+    public void skipToPrevious(String accessToken) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(accessToken);
+
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+            String url = "https://api.spotify.com/v1/me/player/previous";
+
+            restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+            System.out.println("Skipped to previous track");
+
+        } catch (Exception e) {
+            System.out.println("Error skipping to previous track: " + e.getMessage());
+        }
+    }
+
+    public void setVolume(String accessToken, int volumePercent) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(accessToken);
+
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+            String url = String.format("https://api.spotify.com/v1/me/player/volume?volume_percent=%d", volumePercent);
+
+            restTemplate.exchange(url, HttpMethod.PUT, entity, String.class);
+            System.out.println("Volume set to: " + volumePercent + "%");
+
+        } catch (Exception e) {
+            System.out.println("Error setting volume: " + e.getMessage());
+        }
+    }
+
+    // Get available devices
+    public Map<String, Object> getAvailableDevices(String accessToken) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(accessToken);
+
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+            String url = "https://api.spotify.com/v1/me/player/devices";
+
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url, HttpMethod.GET, entity, String.class);
+
+            if (response.getStatusCode() == HttpStatus.OK) {
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode root = mapper.readTree(response.getBody());
+                
+                Map<String, Object> result = new HashMap<>();
+                List<Map<String, Object>> devices = new ArrayList<>();
+                
+                for (JsonNode device : root.get("devices")) {
+                    Map<String, Object> deviceInfo = new HashMap<>();
+                    
+                    deviceInfo.put("id", device.get("id").asText());
+                    deviceInfo.put("name", device.get("name").asText());
+                    deviceInfo.put("type", device.get("type").asText());
+                    deviceInfo.put("is_active", device.get("is_active").asBoolean());
+                    deviceInfo.put("is_private_session", device.get("is_private_session").asBoolean());
+                    deviceInfo.put("is_restricted", device.get("is_restricted").asBoolean());
+                    deviceInfo.put("volume_percent", device.get("volume_percent").asInt());
+                    
+                    devices.add(deviceInfo);
+                }
+                
+                result.put("devices", devices);
+                return result;
+            }
+        } catch (Exception e) {
+            System.out.println("Error fetching devices: " + e.getMessage());
+        }
+        
+        return new HashMap<>();
+    }
+
+    // Transfer playback to specific device
+    public void transferPlayback(String accessToken, String deviceId, boolean play) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(accessToken);
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            String transferBody = String.format("{\"device_ids\":[\"%s\"],\"play\":%s}", deviceId, play);
+            HttpEntity<String> entity = new HttpEntity<>(transferBody, headers);
+
+            String url = "https://api.spotify.com/v1/me/player";
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.PUT, entity, String.class);
+            
+            if (response.getStatusCode().is2xxSuccessful()) {
+                System.out.println("Playback transferred to device: " + deviceId);
+            }
+
+        } catch (Exception e) {
+            System.out.println("Error transferring playback: " + e.getMessage());
+        }
+    }
+
+    // Get user's saved (liked) tracks with pagination
+    public List<Map<String, String>> getUserSavedTracks(String accessToken, int offset) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(accessToken);
+
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+
+            // Fetch 50 songs, starting from the specific offset
+            String url = "https://api.spotify.com/v1/me/tracks?limit=50&offset=" + offset;
+
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url, HttpMethod.GET, entity, String.class);
+
+            if (response.getStatusCode() == HttpStatus.OK) {
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode root = mapper.readTree(response.getBody());
+                List<Map<String, String>> savedTracks = new ArrayList<>();
+
+                if (root.has("items")) {
+                    for (JsonNode item : root.get("items")) {
+                        JsonNode track = item.get("track");
+                        Map<String, String> trackInfo = new HashMap<>();
+
+                        trackInfo.put("name", track.get("name").asText());
+                        trackInfo.put("artist", track.get("artists").get(0).get("name").asText());
+                        trackInfo.put("uri", track.get("uri").asText());
+
+                        // Get image safely
+                        if (track.get("album").has("images") && track.get("album").get("images").size() > 0) {
+                            trackInfo.put("image", track.get("album").get("images").get(0).get("url").asText());
+                        } else {
+                            trackInfo.put("image", "/images/default.png");
+                        }
+
+                        savedTracks.add(trackInfo);
+                    }
+                }
+                return savedTracks;
+            }
+        } catch (Exception e) {
+            System.out.println("Error fetching saved tracks: " + e.getMessage());
+        }
+        return new ArrayList<>();
+    }
 }

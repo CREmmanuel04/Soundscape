@@ -169,9 +169,11 @@
 </div>
 
 <script>
-    // Scroll to the bottom of the chat box on page load
-    const chatBox = document.getElementById('chatBox');
-    chatBox.scrollTop = chatBox.scrollHeight;
+    // Wait for the window to fully load before scrolling
+    window.onload = function() {
+        const chatBox = document.getElementById('chatBox');
+        chatBox.scrollTop = chatBox.scrollHeight;
+    };
 </script>
 </body>
 </html>
