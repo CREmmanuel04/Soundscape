@@ -69,9 +69,9 @@ public class MessageController {
             return "redirect:/messages";
         }
 
-        // Fetch the conversation history
+        // Fetch the conversation history (messages sent in both directions)
         List<Message> messages = messageRepository
-                .findBySenderAndRecipientOrRecipientAndSenderOrderByCreatedAtAsc(sender, recipient, recipient, sender);
+                .findBySenderAndRecipientOrSenderAndRecipientOrderByCreatedAtAsc(sender, recipient, recipient, sender);
 
         model.addAttribute("recipient", recipient);
         model.addAttribute("messages", messages);
