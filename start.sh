@@ -8,6 +8,13 @@ if [ -n "$DATABASE_URL" ]; then
     # Render internal hostnames look like: dpg-xxxxx-a (missing domain)
     JDBC_URL=$(echo "$JDBC_URL" | sed -E 's|@(dpg-[a-z0-9]+-[a-z])(/)|@\1.oregon-postgres.render.com\2|')
     
+    # Add SSL parameters for Render PostgreSQL
+    if echo "$JDBC_URL" | grep -q "?"; then
+        JDBC_URL="${JDBC_URL}&sslmode=require"
+    else
+        JDBC_URL="${JDBC_URL}?sslmode=require"
+    fi
+    
     export SPRING_DATASOURCE_URL="$JDBC_URL"
     echo "Original DATABASE_URL: $DATABASE_URL"
     echo "Converted to JDBC URL: $JDBC_URL"
