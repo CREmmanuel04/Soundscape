@@ -303,6 +303,93 @@
         .spotify-not-connected {
             color: var(--secondary-text-color);
         }
+
+        /* --- Follow Modal Styles --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none; /* Hidden by default */
+            align-items: center;
+            justify-content: center;
+            z-index: 1001;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: var(--surface-color);
+            padding: 2rem;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 400px;
+            position: relative;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+            max-height: 70vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: var(--secondary-text-color);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .modal-content h3 {
+            margin-top: 0;
+            color: var(--accent-color);
+            text-align: center;
+        }
+
+        .follow-list {
+            overflow-y: auto;
+            margin-top: 1rem;
+        }
+
+        /* Style scrollbar for the list */
+        .follow-list::-webkit-scrollbar { width: 8px; }
+        .follow-list::-webkit-scrollbar-track { background: #1E1E1E; }
+        .follow-list::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+        .follow-list::-webkit-scrollbar-thumb:hover { background: #1DB954; }
+        .follow-list { scrollbar-width: thin; scrollbar-color: #444 #1E1E1E; }
+
+        .follow-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.8rem;
+            border-radius: 8px;
+            transition: background 0.2s;
+            text-decoration: none;
+            color: var(--primary-text-color);
+        }
+
+        .follow-item:hover {
+            background: var(--input-background, #333);
+        }
+
+        .follow-item-icon {
+            font-size: 1.5rem;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: var(--background-color);
+        }
+
+        .follow-item-name {
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
@@ -343,11 +430,11 @@
             
             <!-- Follow Statistics -->
             <div class="follow-stats">
-                <div class="stat-item">
+                <div class="stat-item" id="followersBtn" th:data-userid="${user.id}" style="cursor: pointer;">
                     <span class="stat-number" id="followerCount" th:text="${user.followerCount != null ? user.followerCount : 0}">0</span>
                     <span class="stat-label">Followers</span>
                 </div>
-                <div class="stat-item">
+                <div class="stat-item" id="followingBtn" th:data-userid="${user.id}" style="cursor: pointer;">
                     <span class="stat-number" id="followingCount" th:text="${user.followingCount != null ? user.followingCount : 0}">0</span>
                     <span class="stat-label">Following</span>
                 </div>
@@ -401,6 +488,14 @@
                 <div th:if="${user.spotifyUserId == null}" class="spotify-not-connected">
                     <i class="fab fa-spotify"></i> Spotify Not Connected
                 </div>
+            </div>
+        </div>
+    </div>
+    <div id="followModal" class="modal-overlay">
+        <div class="modal-content">
+            <button id="closeModalBtn" class="modal-close" aria-label="Close modal">&times;</button>
+            <h3 id="modalTitle">Followers</h3>
+            <div id="modalUserList" class="follow-list">
             </div>
         </div>
     </div>
@@ -530,6 +625,72 @@
             });
         }
     });
+    // --- Follow Modal Logic ---
+
+    const modal = document.getElementById('followModal');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalUserList = document.getElementById('modalUserList');
+    const followersBtn = document.getElementById('followersBtn');
+    const followingBtn = document.getElementById('followingBtn');
+
+    // Function to fetch and display the user list
+    async function fetchFollowList(userId, type) {
+        // Set title and loading state
+        modalTitle.textContent = type === 'followers' ? 'Followers' : 'Following';
+        modalUserList.innerHTML = '<p style="text-align: center; color: var(--secondary-text-color);">Loading...</p>';
+        modal.style.display = 'flex'; // Show the modal
+
+        try {
+            const response = await fetch(`/api/users/${userId}/${type}`);
+            if (!response.ok) throw new Error('Network response was not ok');
+
+            const data = await response.json();
+            const users = data[type] || []; // Get 'followers' or 'following' list from response
+
+            if (users.length === 0) {
+                modalUserList.innerHTML = `<p style="text-align: center; color: var(--secondary-text-color);">No ${type} found.</p>`;
+                return;
+            }
+
+            // Build the HTML for the user list
+            modalUserList.innerHTML = users.map(user => `
+                <a href="/user/${user.id}" class="follow-item">
+                    <div class="follow-item-icon">${user.profileIcon || '😀'}</div>
+                    <span class="follow-item-name">${user.username}</span>
+                </a>
+            `).join('');
+
+        } catch (error) {
+            console.error('Error fetching follow list:', error);
+            modalUserList.innerHTML = '<p style="text-align: center; color: var(--like-color);">Failed to load list.</p>';
+        }
+    }
+
+    // Add click listeners to buttons
+    if (followersBtn) {
+        followersBtn.addEventListener('click', () => {
+            const userId = followersBtn.getAttribute('data-userid');
+            fetchFollowList(userId, 'followers');
+        });
+    }
+
+    if (followingBtn) {
+        followingBtn.addEventListener('click', () => {
+            const userId = followingBtn.getAttribute('data-userid');
+            fetchFollowList(userId, 'following');
+        });
+    }
+
+    // Close modal events
+    closeModalBtn.addEventListener('click', () => modal.style.display = 'none');
+    modal.addEventListener('click', (e) => {
+        // Close if they click on the overlay (background) but not the content
+        if (e.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+    // --- End Follow Modal Logic ---
 
     // Enhanced play function with fallback
     function playFavoriteSong() {
