@@ -18,29 +18,17 @@
             --border-color: #2a2a2a;
         }
 
-
-        .chat-container::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .chat-container::-webkit-scrollbar-track {
-            background: #1E1E1E; /* Matches the surface color */
-            border-radius: 4px;
-        }
-
-        .chat-container::-webkit-scrollbar-thumb {
-            background: #444; /* Dark grey handle */
-            border-radius: 4px;
-        }
-
-        .chat-container::-webkit-scrollbar-thumb:hover {
-            background: #1DB954; /* Spotify green on hover */
-        }
-
-        /* For Firefox support */
-        .chat-container {
-            scrollbar-width: thin;
-            scrollbar-color: #444 #1E1E1E;
+        .post-author-icon {
+            font-size: 1.5rem;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--background-color);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            flex-shrink: 0; /* Prevents icon from shrinking */
         }
 
         body {
@@ -147,7 +135,7 @@
     <ul class="user-list">
         <li th:each="user : ${users}" class="user-list-item">
             <a th:href="@{/messages/{username}(username=${user.username})}">
-                <i class="fas fa-user-circle"></i>
+                <span class="post-author-icon" th:text="${user.profileIcon != null ? user.profileIcon : '😀'}"></span>
                 <span th:text="${user.username}">Username</span>
             </a>
         </li>
