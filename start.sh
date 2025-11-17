@@ -4,9 +4,10 @@ if [ -n "$DATABASE_URL" ]; then
     # Convert postgres:// or postgresql:// to jdbc:postgresql://
     JDBC_URL=$(echo "$DATABASE_URL" | sed -E 's|^(postgres(ql)?://)|jdbc:postgresql://|')
     
-    # Fix Render's internal hostname format (add .render.com if missing)
+    # Fix Render's internal hostname format (add full domain if missing)
     # Render internal hostnames look like: dpg-xxxxx-a (missing domain)
-    JDBC_URL=$(echo "$JDBC_URL" | sed -E 's|@(dpg-[a-z0-9]+-[a-z])(/)|@\1.oregon-postgres.render.com\2|')
+    # Try adding the full Render PostgreSQL domain
+    JDBC_URL=$(echo "$JDBC_URL" | sed -E 's|@(dpg-[a-z0-9]+-[a-z0-9]+)(/)|@\1.oregon-postgres.render.com\2|')
     
     # Add SSL parameters for Render PostgreSQL
     if echo "$JDBC_URL" | grep -q "?"; then
