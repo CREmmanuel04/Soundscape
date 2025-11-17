@@ -45,9 +45,25 @@ public class PostController {
 
     @GetMapping("/posts/search")
     public String searchPosts(@RequestParam String q, Model model) {
-        List<Post> posts = postRepository.findByContentContainingIgnoreCaseOrderByCreatedAtDesc(q);
+
+        List<Post> posts;
+        String queryPrefix = "from:";
+
+        if (q.startsWith(queryPrefix)) {
+            // This is an author search
+            String authorName = q.substring(queryPrefix.length()).trim();
+            posts = postRepository.findByAuthorContainingIgnoreCaseOrderByCreatedAtDesc(authorName);
+
+            // Tweak the search query for display
+            model.addAttribute("searchQuery", "Posts from " + authorName);
+
+        } else {
+            // This is a normal content search
+            posts = postRepository.findByContentContainingIgnoreCaseOrderByCreatedAtDesc(q);
+            model.addAttribute("searchQuery", q);
+        }
+
         model.addAttribute("posts", posts);
-        model.addAttribute("searchQuery", q);
         return "posts"; // Reuse same template
     }
 
