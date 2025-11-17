@@ -179,47 +179,6 @@ public class SpotifyController {
         return "redirect:/spotify-success";
     }
 
-    // Enhanced Now Playing with playlists and advanced controls
-    @GetMapping("/now-playing-enhanced")
-    public String nowPlayingEnhanced(@AuthenticationPrincipal UserDetails userDetails, Model model) {
-        if (userDetails == null) {
-            return "redirect:/login";
-        }
-
-        Optional<User> userOpt = userRepository.findByUsername(userDetails.getUsername());
-
-        if (userOpt.isPresent()) {
-            User user = userOpt.get();
-            boolean hasSpotifyToken = user.isSpotifyConnected();
-            model.addAttribute("connected", hasSpotifyToken);
-
-            if (hasSpotifyToken) {
-                // Get Spotify profile
-                Map<String, String> spotifyProfile = spotifyService.getUserProfile(user.getSpotifyAccessToken());
-                model.addAttribute("spotifyProfile", spotifyProfile);
-
-                // Get currently playing track
-                Map<String, String> currentlyPlaying = spotifyService.getCurrentlyPlaying(user.getSpotifyAccessToken());
-                model.addAttribute("trackInfo", currentlyPlaying);
-
-                // Get user's playlists
-                Map<String, Object> playlists = spotifyService.getUserPlaylists(user.getSpotifyAccessToken(), 50);
-                model.addAttribute("playlists", playlists.get("playlists"));
-
-                // Get available devices
-                Map<String, Object> devices = spotifyService.getAvailableDevices(user.getSpotifyAccessToken());
-                model.addAttribute("devices", devices.get("devices"));
-
-                // Pass user to frontend
-                model.addAttribute("user", user);
-            }
-        } else {
-            model.addAttribute("connected", false);
-        }
-
-        return "now-playing-enhanced";
-    }
-
     // API endpoint for getting playlists (AJAX)
     @GetMapping("/api/spotify/playlists")
     @ResponseBody
