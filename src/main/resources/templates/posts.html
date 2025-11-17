@@ -10,6 +10,22 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <style>
+        .post-author-icon {
+            font-size: 1.5rem; /* Makes emoji bigger */
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--input-background);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1; /* Helps center emoji */
+        }
+
+        .post-author i { /* Keep this rule */
+            color: var(--secondary-text-color);
+        }
+
         .play-on-feed-btn {
             display: inline-block;
             background: var(--accent-color);
@@ -335,7 +351,9 @@
         <div th:each="post : ${posts}" class="post-card">
             <div class="post-header">
                 <div class="post-author">
-                    <i class="fas fa-user-circle"></i>
+                    <span class="post-author-icon"
+                          th:text="${post.user?.profileIcon != null ? post.user.profileIcon : '😀'}">
+                    </span>
                     <a th:if="${post.user != null}" 
                        th:href="${post.author == #authentication.principal.username ? '/profile' : '/user/' + post.user.id}" 
                        class="author-link"
